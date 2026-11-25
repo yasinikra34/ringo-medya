@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#ffffff">
+<meta name="robots" content="noindex">
+<title>Hediye Deneme · Ringo</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;background:#fff;color:#1d1230;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{position:sticky;top:0;z-index:5;padding:calc(12px + env(safe-area-inset-top)) 16px 10px;background:rgba(255,255,255,.94);backdrop-filter:blur(10px);border-bottom:1px solid #efe7fb}
+h1{margin:0;font-size:19px;background:linear-gradient(90deg,#ff2bd6,#9b2bff,#16a6ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+p{margin:4px 0 0;font-size:12px;color:#6b5b84}
+.bar{display:flex;gap:8px;margin-top:10px}
+.bar button{flex:1;height:36px;border:0;border-radius:999px;font-weight:800;font-size:12px;color:#fff;background:linear-gradient(90deg,#ff2bd6,#9b2bff)}
+.bar button.ikinci{background:#f3ecff;color:#6b2bd6}
+.sahne{position:fixed;inset:0;z-index:0;pointer-events:none;background:linear-gradient(180deg,#2a6f86,#c44f7c)}
+body.koyu .sahne{display:block}
+.sahne{display:none}
+main{position:relative;z-index:1;display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:10px;padding:14px 14px calc(24px + env(safe-area-inset-bottom))}
+.k{border:1px solid #efe7fb;border-radius:16px;background:#fff;padding:8px 6px 9px;text-align:center;box-shadow:0 4px 14px rgba(155,43,255,.08)}
+.k:active{transform:scale(.96)}
+.k img{width:100%;aspect-ratio:3/4;object-fit:cover;border-radius:11px;background:#f6f0ff}
+.k b{display:block;margin-top:6px;font-size:12px;line-height:1.2}
+.k small{display:block;margin-top:2px;font-size:11px;color:#ff8a00;font-weight:800}
+.k.oynuyor{outline:3px solid #ff2bd6}
+.uyari{padding:40px 20px;text-align:center;color:#6b5b84;grid-column:1/-1}
+</style>
+</head>
+<body>
+<div class="sahne" aria-hidden="true"></div>
+<header>
+  <h1>Hediye Deneme</h1>
+  <p>Dokunduğun hediyenin efekti yalnız senin ekranında oynar. Jeton düşmez, kimseye gitmez.</p>
+  <div class="bar"><button id="hepsi">Hepsini sırayla oynat</button><button class="ikinci" id="zemin">Renkli zemin</button></div>
+</header>
+<main id="liste"><div class="uyari">Yükleniyor…</div></main>
+<script src="/assets/ringo-hediye.js?v=6"></script>
+<script>
+(async () => {
+  const $ = id => document.getElementById(id), liste = $('liste');
+  const kac = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  let rows = [];
+  try {
+    const r = await fetch('/api/hediye-deneme', { credentials: 'same-origin', cache: 'no-store' });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Bu sayfa yalnız Ringo sahibine açık.');
+    rows = (d.gifts || []).filter(g => g.effect === 'video');
+  } catch (e) { liste.innerHTML = '<div class="uyari">' + kac(e.message) + '</div>'; return; }
+  RingoHediye.katalog(rows);
+  liste.innerHTML = rows.map(g => `<button class="k" data-kod="${kac(g.code)}"><img loading="lazy" src="/assets/hediyeler/${kac(g.asset_key)}.jpg" alt=""><b>${kac(g.name)}</b><small>${Number(g.unit_price).toLocaleString('tr-TR')} jeton</small></button>`).join('');
+  let dur = false;
+  const oynat = async kod => {
+    const el = liste.querySelector('[data-kod="' + CSS.escape(kod) + '"]');
+    if (el) el.classList.add('oynuyor');
+    await RingoHediye.oynat(kod, { kimden: 'Deneme', kime: 'Sana' });
+    if (el) el.classList.remove('oynuyor');
+  };
+  liste.addEventListener('click', e => { const k = e.target.closest('[data-kod]'); if (k) { RingoHediye.kilitAc(); oynat(k.dataset.kod); } });
+  $('hepsi').onclick = async () => {
+    RingoHediye.kilitAc();
+    if (dur === false && $('hepsi').dataset.on === '1') { dur = true; return; }
+    $('hepsi').dataset.on = '1'; $('hepsi').textContent = 'Durdur'; dur = false;
+    for (const g of rows.slice().reverse()) { if (dur) break; await oynat(g.code); }
+    $('hepsi').dataset.on = ''; $('hepsi').textContent = 'Hepsini sırayla oynat'; dur = false;
+  };
+  $('zemin').onclick = () => { document.body.classList.toggle('koyu'); $('zemin').textContent = document.body.classList.contains('koyu') ? 'Beyaz zemin' : 'Renkli zemin'; };
+})();
+</script>
+</body>
+</html>
