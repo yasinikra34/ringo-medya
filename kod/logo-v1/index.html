@@ -1,0 +1,819 @@
+<!doctype html>
+<html lang="tr" class="ana-beyaz">
+<head>
+<script>/* İlk giriş formu kontrolü bitene kadar ana ekran görünmesin (formu doldurmuş kullanıcıda bekleme yok) */
+try{if(localStorage.getItem('ringo_ob_ok')!=='1'){document.documentElement.classList.add('ringo-ob-wait');setTimeout(function(){document.documentElement.classList.remove('ringo-ob-wait');},6000);}}catch(e){}</script>
+<style>html.ringo-ob-wait,html.ringo-ob-wait body{background:#0c0418!important}html.ringo-ob-wait body>*{visibility:hidden!important}</style>
+<meta charset="utf-8">
+<script>/* Açılış ekranı: sıra e-posta girişi → bilgi formu → açılış ekranı → ana ekran. Yalnız girişi ve formu tamamlanmış
+   kullanıcıya (ringo_ob_ok), oturumda bir kez (ringo_acilis) gösterilir; giriş yapmamış ziyaretçi doğrudan giriş sayfasına gider. */
+try{if(sessionStorage.getItem('ringo_acilis')==='1'||localStorage.getItem('ringo_ob_ok')!=='1')document.documentElement.classList.add('ringo-acilis-yok');}catch(e){}</script>
+<style>
+#ringoAcilis{position:fixed;inset:0;z-index:2147483000;background:#05020a;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;transition:opacity .45s ease}
+html.ringo-acilis-yok #ringoAcilis{display:none}
+html.ringo-ob-wait body>#ringoAcilis{visibility:visible!important}
+#ringoAcilis.cik{opacity:0;pointer-events:none}
+#ringoAcilis .ra-img{position:absolute;left:50%;top:44%;width:max(100vw,calc(100vh*.64));aspect-ratio:720/825;transform:translate(-50%,-50%) scale(1.06);
+  background:url(/assets/acilis/ringo-acilis.svg) center/cover no-repeat;
+  -webkit-mask-image:radial-gradient(ellipse 62% 58% at 50% 50%,#000 58%,transparent 100%);mask-image:radial-gradient(ellipse 62% 58% at 50% 50%,#000 58%,transparent 100%);
+  animation:raZoom 1.8s cubic-bezier(.2,.7,.3,1) forwards}
+#ringoAcilis::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,2,10,0) 55%,rgba(5,2,10,.85) 82%,#05020a 100%);pointer-events:none}
+#ringoAcilis .ra-alt{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:calc(12vh + env(safe-area-inset-bottom));animation:raUp .7s .15s both cubic-bezier(.2,.9,.3,1)}
+#ringoAcilis .ra-logo{width:min(44vw,180px);height:auto;filter:drop-shadow(0 6px 14px rgba(0,0,0,.45))}
+#ringoAcilis .ra-ad{font:900 30px/1 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;letter-spacing:.42em;margin-right:-.42em;
+  background:linear-gradient(180deg,#fff 0%,#efe4ff 45%,#b98cff 100%);-webkit-background-clip:text;background-clip:text;color:transparent}
+#ringoAcilis .ra-bar{width:132px;height:4px;border-radius:9px;background:rgba(166,77,255,.22);overflow:hidden}
+#ringoAcilis .ra-bar i{display:block;height:100%;width:40%;border-radius:9px;background:linear-gradient(90deg,#7b2cf0,#d68cff);animation:raBar 1.1s ease-in-out infinite}
+@keyframes raZoom{from{transform:translate(-50%,-50%) scale(1.06);opacity:.2}to{transform:translate(-50%,-50%) scale(1);opacity:1}}
+@keyframes raUp{from{transform:translateY(16px);opacity:0}to{transform:none;opacity:1}}
+@keyframes raBar{0%{transform:translateX(-110%)}100%{transform:translateX(260%)}}
+@media (prefers-reduced-motion:reduce){#ringoAcilis .ra-img,#ringoAcilis .ra-alt,#ringoAcilis .ra-bar i{animation:none}}
+</style>
+
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#090b12">
+<title>Ringo — Ana Ekran</title>
+<link rel="icon" href="/favicon.ico?v=2" sizes="32x32"><link rel="icon" type="image/png" href="/assets/ringo-ikon-192.png?v=1" sizes="192x192"><link rel="apple-touch-icon" href="/assets/apple-touch-icon.png?v=1">
+<style>
+:root{color-scheme:dark;--bg:#090b12;--panel:#141824;--panel2:#1b2030;--gold:#d8b45d;--gold2:#f1d58a;--muted:#9ba2b4;--line:rgba(255,255,255,.09)}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;background:radial-gradient(ellipse at 50% -15%,#263047 0,#111725 38%,#090b12 75%);color:#f7f4ed;font-family:Georgia,"Times New Roman",serif;min-height:100vh}
+button{font:inherit;color:inherit;border:0;cursor:pointer} .app{width:min(100%,520px);margin:auto;min-height:100vh;padding:env(safe-area-inset-top) 14px calc(92px + env(safe-area-inset-bottom))}
+.top{display:flex;align-items:center;justify-content:space-between;padding:14px 2px 12px;gap:10px}.brand{display:flex;align-items:center;justify-content:center;flex:1;min-width:0}.brand img{display:block;width:84px;height:86px;object-fit:contain;filter:drop-shadow(0 4px 12px #0009)}.tools{display:flex;align-items:center;gap:8px}.tool{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:linear-gradient(145deg,#272d3d,#111622);border:1px solid #ffffff18;box-shadow:0 5px 14px #0008;color:var(--gold2);font-family:Arial,sans-serif;font-size:16px}.header-shortcuts{gap:6px;flex:0 0 auto}.header-shortcut{position:relative;width:50px;min-width:50px;min-height:48px;padding:4px 2px;display:inline-flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border:1px solid #d8b45d66;border-radius:12px;background:linear-gradient(145deg,#293247,#121a2a);box-shadow:0 4px 12px #0007,inset 0 1px 0 #ffffff20;color:#f1d58a;font:700 9px/1 Arial,sans-serif;white-space:nowrap}.header-shortcut svg{width:16px;height:16px;flex:0 0 16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}.header-shortcut small{display:block;color:#fff0bd;font:700 8px/1 Arial,sans-serif}.header-shortcut:active{transform:translateY(1px);filter:brightness(1.15)}.header-shortcut[data-unread]:after{content:attr(data-unread);position:absolute;top:-6px;right:-5px;min-width:16px;height:16px;padding:0 4px;display:grid;place-items:center;border:1px solid #101522;border-radius:10px;background:#d84d5b;color:#fff;font:800 9px Arial,sans-serif}.balance{display:flex;align-items:center;gap:6px;padding:8px 10px;border-radius:22px;background:#1b2030;border:1px solid #d8b45d55;color:var(--gold2);font:600 12px Arial,sans-serif;white-space:nowrap}
+.section{margin:12px 0 18px}.section-head{display:flex;align-items:center;justify-content:space-between;margin:0 2px 10px}.section-head h2{font-size:17px;letter-spacing:.2px;margin:0;font-weight:600}.more{background:none;color:var(--gold2);font:12px Arial,sans-serif}
+/* Eski Popüler Odalar kart stilleri kaldırıldı. */
+.agency{display:flex;align-items:center;gap:12px;padding:13px;border-radius:16px;background:linear-gradient(115deg,#242b3c,#151a27);border:1px solid #d9b45b55;box-shadow:0 9px 22px #0006}.crown{width:40px;height:40px;border-radius:13px;display:grid;place-items:center;background:#d7b15a20;color:var(--gold2);font:22px Arial}.agency-copy{flex:1}.agency-copy strong{display:block;font-size:15px}.agency-copy small{display:block;color:var(--muted);font:11px Arial,sans-serif;margin-top:3px}.chevron{color:var(--gold2);font:24px Arial}\n/* Ajanslar kartı: neo-gece, mor neon ve cilalı altın yüzey. Mevcut agencyEntry tıklama bağlantısı korunur. */\n.agency-neo{position:relative;isolation:isolate;min-height:142px;width:100%;overflow:hidden;gap:14px;padding:18px 16px;border:1px solid rgba(255,210,112,.95);border-radius:20px;background:radial-gradient(ellipse at 8% 50%,rgba(171,45,255,.58),transparent 42%),radial-gradient(ellipse at 94% 10%,rgba(44,85,255,.48),transparent 34%),radial-gradient(ellipse at 75% 100%,rgba(181,25,255,.42),transparent 44%),linear-gradient(112deg,#10051f 0%,#080d22 48%,#160629 100%);box-shadow:0 0 0 1px rgba(153,70,255,.65),0 0 17px rgba(162,42,255,.62),0 0 34px rgba(94,48,255,.28),0 13px 28px #000b,inset 0 1px 2px #fff7,inset 0 -12px 28px rgba(99,22,173,.28);text-align:left}\n.agency-neo:before{content:"";position:absolute;z-index:-1;inset:5px;border:1px solid rgba(255,204,95,.78);border-radius:15px;box-shadow:0 0 9px rgba(255,190,70,.55),inset 0 0 18px rgba(172,57,255,.25);pointer-events:none}\n.agency-neo:after{content:"";position:absolute;z-index:-1;inset:0;opacity:.72;background:radial-gradient(circle at 8% 24%,#fff 0 1px,transparent 2px),radial-gradient(circle at 42% 16%,#ffdc86 0 1px,transparent 2px),radial-gradient(circle at 71% 27%,#a8c9ff 0 1px,transparent 2px),radial-gradient(circle at 89% 65%,#fff 0 1px,transparent 2px),radial-gradient(ellipse at 50% 115%,rgba(196,34,255,.42),transparent 48%),linear-gradient(115deg,transparent 32%,rgba(255,255,255,.08) 49%,transparent 65%);pointer-events:none}\n.agency-neo .agency-neo-star{position:absolute;top:12px;left:45%;color:#ffdb82;font:30px Georgia,serif;text-shadow:0 0 12px #ffb52f,0 0 22px #a33dff}\n.agency-neo .crown{flex:0 0 92px;width:92px;height:92px;border-radius:24px;background:radial-gradient(circle at 50% 40%,rgba(255,208,88,.3),rgba(92,24,153,.28) 58%,transparent 72%);color:#ffdc79;font:66px/1 Georgia,serif;text-shadow:0 2px 0 #8a4a0c,0 0 8px #ffcf5c,0 0 18px #a33cff;filter:drop-shadow(0 7px 9px #000b)}\n.agency-neo .agency-copy{position:relative;z-index:1;min-width:0}.agency-neo .agency-copy strong{font:900 clamp(25px,7vw,34px)/1 Georgia,serif;letter-spacing:.2px;color:#ffe39a;text-shadow:0 2px 0 #7d4314,0 0 9px #ffca62,0 0 19px rgba(255,172,52,.72)}.agency-neo .agency-copy small{margin-top:10px;color:#f4f0ff;font:600 12px/1.5 Arial,sans-serif;text-shadow:0 1px 5px #000,0 0 10px #a45aff}.agency-neo .agency-copy small br{display:block}.agency-neo .chevron{flex:0 0 48px;width:48px;height:48px;display:grid;place-items:center;border:1px solid #ffdc79;border-radius:50%;background:radial-gradient(circle,#481c72,#100820 72%);color:#ffe49a;font:900 32px/1 Arial,sans-serif;text-shadow:0 0 9px #ffb52f;box-shadow:0 0 0 3px rgba(192,75,255,.25),0 0 16px #d33dff,inset 0 1px 2px #fff7}\n.agency-neo:active{filter:brightness(1.16);transform:translateY(1px)}\n@media(max-width:380px){.agency-neo{min-height:126px;gap:9px;padding:14px 11px}.agency-neo .crown{flex-basis:72px;width:72px;height:72px;font-size:54px}.agency-neo .agency-copy strong{font-size:25px}.agency-neo .agency-copy small{font-size:10px}.agency-neo .chevron{flex-basis:40px;width:40px;height:40px;font-size:27px}}
+/* Eski Popüler Odalar filtre stilleri kaldırıldı. */
+.moments{display:flex;gap:10px;overflow:auto;padding-bottom:5px;scrollbar-width:none}.moment{min-width:122px;height:154px;border-radius:15px;overflow:hidden;position:relative;background:linear-gradient(160deg,#45516a,#182132 55%,#0b0e16);border:1px solid #ffffff1c}.moment:after{content:"";position:absolute;inset:35% 0 0;background:linear-gradient(transparent,#090b12)}.moment .avatar{position:absolute;top:10px;left:10px;width:30px;height:30px;border-radius:50%;border:2px solid var(--gold);background:linear-gradient(135deg,#e5c97e,#4c5363)}.moment strong{position:absolute;z-index:1;bottom:28px;left:10px;font-size:12px}.moment small{position:absolute;z-index:1;bottom:11px;left:10px;color:#d1d3da;font:10px Arial}
+/* Oyun Merkezi kartı stilleri kaldırıldı. */
+.bottom{position:fixed;z-index:10;left:50%;transform:translateX(-50%);bottom:0;width:min(100%,520px);padding:8px 10px calc(8px + env(safe-area-inset-bottom));display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);background:linear-gradient(180deg,#101522ee,#090c14f7);border-top:1px solid #d8b45d30;backdrop-filter:blur(18px);box-shadow:0 -10px 30px #0008}.nav{min-height:57px;background:none;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#9da4b5;font:10px Arial,sans-serif}.nav img{width:34px;height:38px;object-fit:contain;filter:drop-shadow(0 3px 5px #0008);transition:transform .18s,filter .18s}.nav.active{color:var(--gold2)}.nav.active img{transform:translateY(-3px) scale(1.08);filter:drop-shadow(0 0 8px #e4c16a99)}.nav:active img{transform:scale(.91)}.bottom .nav[hidden]{display:none!important}.nav[data-tab="admin"] span{font-size:8px;white-space:nowrap;letter-spacing:-.35px}@media(max-width:360px){.top{gap:4px}.header-shortcuts{gap:4px}.header-shortcut{width:44px;min-width:44px;min-height:46px;gap:3px;padding:3px 1px;font-size:8px}.header-shortcut svg{width:14px;height:14px;flex-basis:14px}.header-shortcut small{font-size:7px}.brand img{width:48px;height:54px}.top>.tools:last-child{gap:4px}}
+@media(min-width:420px){.app{padding-left:18px;padding-right:18px}.room{min-height:160px}.moment{min-width:135px;height:166px}}
+.ringo-layer{position:fixed;inset:0;z-index:80;display:none;align-items:flex-end;justify-content:center;padding:0;background:#05070dc9;backdrop-filter:blur(10px)}
+.ringo-layer.is-open{display:flex}
+.ringo-sheet{width:min(100%,520px);height:min(calc(93dvh + 50px),870px);display:flex;flex-direction:column;overflow:hidden;border:1px solid #d8b45d55;border-bottom:0;border-radius:24px 24px 0 0;background:linear-gradient(155deg,#20283a,#121824 60%,#0b1019);box-shadow:0 -18px 60px #000a;color:#f7f4ed}
+.ringo-sheet-head{display:flex;align-items:center;gap:12px;padding:15px 16px;border-bottom:1px solid #ffffff14}
+.ringo-sheet-head>div{flex:1;min-width:0}.ringo-sheet-head strong{display:block;font-size:17px}.ringo-sheet-head small{display:block;margin-top:3px;color:#9ba2b4;font:11px Arial,sans-serif}
+.ringo-back,.ringo-x{width:38px;height:38px;border:1px solid #ffffff20;border-radius:13px;background:#ffffff0b;color:#f1d58a;font:25px Arial}
+.ringo-x{font-size:22px}.ringo-sheet-body{flex:1;overflow:auto;padding:15px 15px calc(22px + env(safe-area-inset-bottom))}
+.ringo-list-card{width:100%;display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 9px;padding:13px;border:1px solid #ffffff17;border-radius:15px;background:linear-gradient(120deg,#252d40,#151b29);text-align:left}
+.ringo-list-card span{min-width:0;display:block}.ringo-list-card b{display:block;font-size:14px}.ringo-list-card small{display:block;margin-top:4px;color:#aeb6c6;font:11px/1.4 Arial,sans-serif}
+.ringo-list-card em{flex:0 0 auto;color:#e7ca7e;font:11px Arial,sans-serif;font-style:normal}
+.ringo-empty{padding:20px 14px;border:1px solid #ffffff12;border-radius:14px;background:#ffffff06;color:#b9c1cf;font:13px/1.6 Arial,sans-serif;text-align:center}
+.ringo-profile{padding:20px;border:1px solid #d8b45d44;border-radius:17px;background:#ffffff08}.ringo-profile>b{display:block;font-size:18px}.ringo-profile>small,.ringo-profile p{color:#aeb6c6;font:12px/1.5 Arial,sans-serif}.ringo-profile h2{margin:20px 0 0;color:#f1d58a;font:700 27px Arial}.ringo-profile-screen{width:100%;min-height:100%;margin:0 auto;display:flex;align-items:flex-start;justify-content:center;background:#080d17}.ringo-profile-art{display:block;width:100%;max-width:560px;height:auto;object-fit:contain;border-radius:0}
+.ringo-profile-hero{position:relative;overflow:hidden;padding:18px 16px 15px;border:1px solid #48aaff99;border-radius:20px;background:radial-gradient(circle at 88% 8%,#377fcf88,transparent 34%),radial-gradient(circle at 5% 100%,#542caa88,transparent 40%),linear-gradient(145deg,#071b3d,#071126 62%,#101a38);box-shadow:0 10px 28px #00143d99,inset 0 0 24px #3b8eff22}.ringo-profile-hero:after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(115deg,transparent 35%,#ffffff08 50%,transparent 65%)}.ringo-profile-hero-top,.ringo-profile-identity,.ringo-profile-motto{position:relative;z-index:1}.ringo-profile-hero-top{display:flex;align-items:center;justify-content:space-between;gap:8px}.ringo-profile-brand{font:900 17px/1 Arial,sans-serif;letter-spacing:1px;color:#f4ce72;text-shadow:0 2px 12px #e49d36aa}.ringo-profile-brand i{font-style:normal;color:#fff;font-size:11px}.ringo-profile-status{display:flex;align-items:center;gap:6px;color:#a9f4c0;font:10px Arial,sans-serif}.ringo-profile-status i{width:8px;height:8px;border-radius:50%;background:#36ed79;box-shadow:0 0 10px #36ed79}.ringo-profile-identity{display:flex;align-items:center;gap:13px;margin:20px 0 15px}.ringo-profile-avatar{flex:0 0 82px;width:82px;height:82px;border-radius:50%;object-fit:cover;border:3px solid #f0c65e;box-shadow:0 0 0 4px #f0c65e33,0 0 24px #368bff99}.ringo-profile-avatar-empty{display:grid;place-items:center;background:radial-gradient(circle at 30% 20%,#60b8ff,#172e69 65%,#090f27);color:#fff;font:700 36px Georgia,serif}.ringo-profile-identity-copy{min-width:0}.ringo-profile-identity-copy>b{display:block;overflow-wrap:anywhere;color:#fff;font:700 20px/1.15 Arial,sans-serif;text-shadow:0 2px 8px #000}.ringo-profile-identity-copy>small{display:block;margin-top:5px;color:#b7d8ff;font:11px Arial,sans-serif;overflow-wrap:anywhere}.ringo-profile-identity-copy>p{margin:7px 0 0;color:#d7e5ff;font:11px/1.45 Arial,sans-serif}.ringo-profile-motto{padding:10px 8px;border-top:1px solid #63baff77;border-bottom:1px solid #63baff77;text-align:center;color:#fff0bf;font:600 12px Arial,sans-serif;text-shadow:0 0 9px #e2b34a}.ringo-profile-section{margin-top:14px;padding:14px;border:1px solid #3e8edc88;border-radius:18px;background:linear-gradient(145deg,#081c3aee,#071329f2);box-shadow:0 8px 20px #0007,inset 0 0 18px #2879d322}.ringo-profile-section-title{margin-bottom:11px;color:#f3d17d;font:800 11px Arial,sans-serif;letter-spacing:1px;text-align:center}.ringo-profile-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.ringo-profile-stat{min-width:0;padding:11px 5px;border:1px solid #438de8aa;border-radius:13px;background:linear-gradient(145deg,#12396b,#071a39);text-align:center}.ringo-profile-stat span,.ringo-profile-stat small{display:block;color:#c9dcf8;font:10px Arial,sans-serif}.ringo-profile-stat b{display:block;margin:5px 0;color:#fff;font:700 23px Arial,sans-serif}.ringo-profile-stat small{font-size:9px;color:#91b5e4}.ringo-profile-stat-note{margin-top:9px;color:#a9c7eb;font:10px/1.5 Arial,sans-serif;text-align:center}.ringo-profile-achievements p{margin:0;color:#b8cbe6;font:11px/1.55 Arial,sans-serif;text-align:center}.ringo-profile-menu{display:grid;gap:6px;margin-top:14px;padding:10px;border:1px solid #3988d988;border-radius:19px;background:linear-gradient(145deg,#071b38,#081126);box-shadow:0 9px 22px #0008}.ringo-profile-menu button{display:flex;align-items:center;gap:12px;min-height:47px;padding:0 12px;border:1px solid #3d80c766;border-radius:12px;background:linear-gradient(110deg,#12305a,#0a1b38);color:#f2f6ff;text-align:left}.ringo-profile-menu button>span{width:25px;color:#f3cb68;font:22px Arial,sans-serif;text-align:center}.ringo-profile-menu button>b{flex:1;font:600 12px Arial,sans-serif}.ringo-profile-menu button>em{color:#a9d7ff;font:24px Arial,sans-serif;font-style:normal}.ringo-profile-menu button.is-signout{border-color:#a9435a88;background:linear-gradient(110deg,#32182a,#11182d);color:#ff8d9b}.ringo-profile-menu button.is-signout>span,.ringo-profile-menu button.is-signout>em{color:#ff7d8e}.ringo-profile-menu button:active{transform:scale(.99);filter:brightness(1.2)}
+.ringo-room-feed{height:calc(100% - 130px);min-height:220px;overflow:auto;padding:8px 2px}
+.ringo-message{max-width:88%;margin:0 0 10px;padding:10px 12px;border:1px solid #ffffff16;border-radius:13px;background:#ffffff08}
+.ringo-message small{color:#e2c77e;font:10px Arial,sans-serif}.ringo-message p{margin:5px 0 0;font:13px/1.5 Arial,sans-serif;overflow-wrap:anywhere}
+.ringo-compose{display:flex;gap:8px;margin-top:12px}.ringo-compose input{flex:1;min-width:0;height:45px;padding:0 13px;border:1px solid #ffffff22;border-radius:13px;background:#090e18;color:#fff;font:13px Arial,sans-serif}
+.ringo-compose button,.ringo-secondary{padding:0 15px;border:1px solid #f3d990;border-radius:13px;background:linear-gradient(135deg,#f0d58a,#b58a3c);color:#211909;font:700 12px Arial,sans-serif}
+.ringo-secondary{width:100%;min-height:42px;margin-top:12px;border-color:#ffffff22;background:#ffffff0b;color:#d9dce4}
+[data-unread]:after{content:attr(data-unread);position:absolute;margin:-26px 0 0 20px;min-width:16px;padding:2px 4px;border-radius:9px;background:#b64b48;color:#fff;font:9px Arial}
+[hidden]{display:none!important}
+/* Tavla: ana sistem panelinin daraltma katmanini kaldir, yalnizca bu oyunu tam ekrana yay. */
+.ringo-layer.tavla-fullscreen{align-items:stretch!important;justify-content:stretch!important;padding:0!important;background:#120d0a!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.ringo-layer.tavla-fullscreen .ringo-sheet{width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;min-height:100dvh!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important}
+.ringo-layer.tavla-fullscreen .ringo-sheet{position:relative!important}.ringo-layer.tavla-fullscreen .ringo-sheet-head{position:absolute;z-index:5;top:max(env(safe-area-inset-top),4px);left:0;right:0;display:flex!important;flex:none;height:40px;min-height:40px;padding:4px 8px;gap:8px;border:0;background:transparent;pointer-events:none}
+.ringo-layer.tavla-fullscreen .ringo-sheet-head>div{display:none!important}
+.ringo-layer.tavla-fullscreen .ringo-sheet-head .ringo-back,.ringo-layer.tavla-fullscreen .ringo-sheet-head .ringo-x{width:32px;height:32px;pointer-events:auto;background:#120d0a88;border:1px solid #d8b45d66;box-shadow:none}
+.ringo-layer.tavla-fullscreen .ringo-sheet-body{flex:1 1 0;min-height:0;width:100%;height:100%!important;padding:0!important;margin:0!important;overflow:hidden!important}
+@media(min-width:600px){.ringo-layer{align-items:center;padding:20px}.ringo-sheet{height:min(82dvh,760px);border-bottom:1px solid #d8b45d55;border-radius:24px}}
+/* Oyun sayfalari: ana panelin kart/pencere gorunumunu kaldir, iframe alanini tam ekrana yay. */
+.ringo-layer.game-fullscreen{align-items:stretch!important;justify-content:stretch!important;padding:0!important;background:#05070d!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.ringo-layer.game-fullscreen .ringo-sheet{width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;min-height:100dvh!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;overflow:hidden!important}
+.ringo-layer.game-fullscreen .ringo-sheet{position:relative!important}.ringo-layer.game-fullscreen .ringo-sheet-head{position:absolute;z-index:5;top:max(env(safe-area-inset-top),4px);left:0;right:0;display:flex!important;flex:none;height:40px;min-height:40px;padding:4px 8px;gap:8px;border:0;background:transparent!important;pointer-events:none}
+.ringo-layer.game-fullscreen .ringo-sheet-head>div{display:none!important}
+.ringo-layer.game-fullscreen .ringo-sheet-head .ringo-back,.ringo-layer.game-fullscreen .ringo-sheet-head .ringo-x{width:32px;height:32px;pointer-events:auto;background:#101722;border:1px solid #ffffff35;box-shadow:none}
+.ringo-layer.game-fullscreen .ringo-sheet-body{display:block!important;flex:1 1 0;min-height:0;width:100%;height:100%!important;padding:0!important;margin:0!important;overflow:hidden!important}
+.ringo-layer.game-fullscreen .ringo-sheet-body iframe{display:block!important;width:100%!important;height:100%!important;min-height:0!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent}
+.ringo-layer.game-fullscreen .ringo-sheet-body>.ringo-empty{display:none!important}
+.ringo-voice-box{margin:0 0 12px;padding:12px;border:1px solid #d8b45d44;border-radius:15px;background:#d8b45d0b}
+.ringo-voice-actions{display:flex;gap:7px;flex-wrap:wrap}
+.ringo-voice-actions button{min-height:36px;padding:0 11px;border:1px solid #d8b45d66;border-radius:11px;background:#d8b45d18;color:#f1d58a;font:600 11px Arial,sans-serif}
+.ringo-voice-box>small{display:block;margin-top:8px;color:#aeb6c6;font:10px/1.5 Arial,sans-serif}
+#ringoRemoteAudio{display:flex;gap:6px;flex-wrap:wrap}
+#ringoRemoteAudio audio{width:1px;height:1px;opacity:.01;position:absolute}
+.ringo-games-page{min-height:100%;margin:-15px;padding:9px;background:#fff;color:#17202b;border-radius:0 0 18px 18px}.ringo-games-intro{display:flex;flex-direction:column;gap:5px;margin:0 0 10px;padding:2px 2px 9px;border-bottom:1px solid #e7eaf0}.ringo-games-intro strong{font:700 20px/1.2 Georgia,serif;color:#17202b}.ringo-games-intro span{font:12px/1.45 Arial,sans-serif;color:#697586}.ringo-games-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.ringo-game-card{position:relative;display:block;width:100%;min-width:0;aspect-ratio:1168/784;overflow:hidden;padding:0;border:0;border-radius:10px;background-color:#151b29;background-position:center;background-size:cover;background-repeat:no-repeat;box-shadow:0 5px 14px #0005;text-align:initial;line-height:0;-webkit-tap-highlight-color:transparent}.ringo-game-card:active{transform:scale(.985)}.ringo-game-name{position:absolute;left:0;right:0;bottom:0;display:block;padding:10px 7px 8px;background:linear-gradient(transparent,rgba(0,0,0,.88));color:#fff;font:800 13px/1.2 Arial,sans-serif;letter-spacing:.25px;text-align:center;text-shadow:0 1px 3px #000;white-space:normal}.ringo-game-state{display:none}.ringo-game-live{position:absolute;top:6px;right:6px;z-index:2;padding:3px 8px;border-radius:999px;font:800 10.5px/1.2 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;color:#fff;background:linear-gradient(135deg,#9b2bff,#2d6bff);box-shadow:0 0 0 1.5px #fff,0 3px 8px rgba(29,18,48,.25);pointer-events:none}.ringo-game-live.acik{background:linear-gradient(135deg,#22d94a,#16a6ff)}.ringo-game-live.acik:before{content:"";display:inline-block;width:6px;height:6px;margin-right:5px;border-radius:50%;background:#fff;vertical-align:1px;animation:rgLive 1.4s ease-in-out infinite}@keyframes rgLive{50%{opacity:.3}}.ringo-game-card-coming{cursor:default;background-color:#151b29;box-shadow:0 5px 14px #0005,inset 0 1px #ffffff20}.ringo-game-card-coming:active{transform:none;filter:none}
+    /* Oyunlar katalog ekrani: dis paneli kaldir, beyaz oyun alanini tam ekrana yay; yalnizca geri tusu kalsin. */
+    .ringo-layer.games-fullscreen{display:flex!important;align-items:stretch!important;justify-content:stretch!important;padding:0!important;background:#fff!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+    .ringo-layer.games-fullscreen .ringo-sheet{position:relative!important;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;min-height:100dvh!important;margin:0!important;border:0!important;border-radius:0!important;background:#fff!important;box-shadow:none!important;color:#17202b!important;overflow:hidden!important}
+    .ringo-layer.games-fullscreen .ringo-sheet-head{position:absolute!important;z-index:8;top:env(safe-area-inset-top)!important;left:0;right:0;height:48px!important;min-height:48px!important;padding:6px 10px!important;border:0!important;background:transparent!important;pointer-events:none}
+    .ringo-layer.games-fullscreen .ringo-sheet-head>div,.ringo-layer.games-fullscreen .ringo-sheet-head .ringo-x{display:none!important}
+    .ringo-layer.games-fullscreen .ringo-sheet-head .ringo-back{display:grid!important;place-items:center;width:36px!important;height:36px!important;border:1px solid #d7dce4!important;border-radius:12px!important;background:#ffffffed!important;color:#17202b!important;font:28px/1 Arial,sans-serif!important;box-shadow:0 2px 8px #17202b18!important;pointer-events:auto!important}
+    .ringo-layer.games-fullscreen .ringo-sheet-body{display:block!important;flex:1 1 0!important;min-height:0!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:auto!important;background:#fff!important;-webkit-overflow-scrolling:touch}
+    .ringo-layer.games-fullscreen .ringo-games-page{box-sizing:border-box;min-height:100%!important;margin:0!important;padding:calc(4px + env(safe-area-inset-top)) 10px calc(14px + env(safe-area-inset-bottom))!important;border-radius:0!important;background:#fff!important;color:#17202b!important}
+    .ringo-layer.games-fullscreen .ringo-games-page>.rpl:first-child .rpl-ust{padding-left:42px;min-height:36px} /* Oyun Liderleri kartı en üstte; geri tuşu kartın sol üst köşesinde durur */
+    .ringo-layer.games-fullscreen .ringo-games-intro{margin-top:0!important}
+/* Ozel mesajlar: dis kart/pencere kabugunu kaldir, sayfayi tam ekrana yay ve yalnizca geri tusunu goster. */
+.ringo-layer.messages-fullscreen{display:flex!important;align-items:stretch!important;justify-content:stretch!important;padding:0!important;background:#0b1019!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.ringo-layer.messages-fullscreen .ringo-sheet{position:relative!important;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;min-height:100dvh!important;margin:0!important;border:0!important;border-radius:0!important;background:linear-gradient(155deg,#20283a,#121824 60%,#0b1019)!important;box-shadow:none!important;overflow:hidden!important}
+.ringo-layer.messages-fullscreen .ringo-sheet-head{position:absolute!important;z-index:8;top:env(safe-area-inset-top)!important;left:0;right:0;height:48px!important;min-height:48px!important;padding:6px 10px!important;border:0!important;background:transparent!important;pointer-events:none}
+.ringo-layer.messages-fullscreen .ringo-sheet-head>div,.ringo-layer.messages-fullscreen .ringo-sheet-head .ringo-x{display:none!important}
+.ringo-layer.messages-fullscreen .ringo-sheet-head .ringo-back{display:grid!important;place-items:center;width:36px!important;height:36px!important;border:1px solid #ffffff24!important;border-radius:12px!important;background:#ffffff12!important;color:#f1d58a!important;font:28px/1 Arial,sans-serif!important;box-shadow:none!important;pointer-events:auto!important}
+.ringo-layer.messages-fullscreen .ringo-sheet-body{display:block!important;flex:1 1 0!important;min-height:0!important;width:100%!important;height:100%!important;margin:0!important;padding:calc(58px + env(safe-area-inset-top)) 15px calc(22px + env(safe-area-inset-bottom))!important;overflow:auto!important;background:transparent!important;-webkit-overflow-scrolling:touch}
+/* Direct messages: clean mobile inbox and readable conversation layout. */
+.ringo-layer.messages-fullscreen .ringo-sheet{background:linear-gradient(160deg,#101a2a,#0b1220 58%,#080e18)!important}
+.ringo-layer.messages-fullscreen .ringo-sheet-body{display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:calc(58px + env(safe-area-inset-top)) 0 calc(10px + env(safe-area-inset-bottom))!important}
+.ringo-direct-list,.ringo-direct-thread{display:flex;flex:1 1 auto;min-height:0;flex-direction:column;width:100%;box-sizing:border-box}
+.ringo-direct-list{padding:0 16px}
+.ringo-direct-heading{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:8px 2px 16px;color:#f5f7fb}
+.ringo-direct-heading strong{font:700 23px/1.2 Arial,sans-serif;letter-spacing:-.45px}
+.ringo-direct-heading span{color:#9daec4;font:11px Arial,sans-serif}
+.ringo-direct-search{display:flex;align-items:center;gap:10px;height:46px;flex:none;padding:0 14px;margin:0 0 14px;border:1px solid rgba(196,211,235,.18);border-radius:15px;background:rgba(255,255,255,.065);box-shadow:inset 0 1px 0 rgba(255,255,255,.07)}
+.ringo-direct-search>span{color:#d7b96f;font:24px Arial,sans-serif}
+.ringo-direct-search input{width:100%;min-width:0;height:100%;border:0;outline:0;background:transparent;color:#fff;font:13px Arial,sans-serif}
+.ringo-direct-search input::placeholder{color:#8f9db1}
+.ringo-direct-rows{flex:1;min-height:0;overflow:auto;padding:0 0 18px;overscroll-behavior:contain}
+.ringo-direct-row{display:flex;align-items:center;gap:12px;width:100%;min-height:76px;padding:10px 5px;border:0;border-bottom:1px solid rgba(196,211,235,.11);background:transparent;color:#f5f7fb;text-align:left}
+.ringo-direct-row:active{background:rgba(255,255,255,.055)}
+.ringo-direct-avatar{display:grid;place-items:center;flex:0 0 48px;width:48px;height:48px;border:1px solid rgba(232,199,119,.55);border-radius:50%;background:radial-gradient(circle at 30% 20%,#344a69,#18263d 72%);color:#f4d58d;font:700 18px Arial,sans-serif;box-shadow:0 4px 13px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.18)}
+.ringo-direct-copy{display:block;flex:1;min-width:0}
+.ringo-direct-copy b{display:block;overflow:hidden;color:#f5f7fb;font:700 14px Arial,sans-serif;text-overflow:ellipsis;white-space:nowrap}
+.ringo-direct-copy small{display:block;overflow:hidden;margin-top:6px;color:#aab7c9;font:12px/1.35 Arial,sans-serif;text-overflow:ellipsis;white-space:nowrap}
+.ringo-direct-row>em{padding:0 7px;color:#d7b96f;font:24px Arial,sans-serif;font-style:normal}
+.ringo-direct-thread{padding:0 13px 8px}
+.ringo-thread-person{display:flex;align-items:center;gap:11px;flex:none;padding:2px 4px 13px;border-bottom:1px solid rgba(196,211,235,.13)}
+.ringo-thread-person .ringo-direct-avatar{width:42px;height:42px;flex-basis:42px;font-size:16px}
+.ringo-thread-person b,.ringo-thread-person small{display:block}
+.ringo-thread-person b{color:#f6f7fa;font:700 14px Arial,sans-serif}
+.ringo-thread-person small{margin-top:4px;color:#9eacc0;font:11px Arial,sans-serif}
+.ringo-direct-thread .ringo-room-feed{display:flex;flex:1 1 auto;flex-direction:column;gap:9px;height:auto;min-height:0;overflow:auto;padding:16px 3px 12px;overscroll-behavior:contain}
+.ringo-direct-thread .ringo-message{display:flex;flex-direction:column;gap:5px;max-width:82%;width:max-content;margin:0;padding:10px 13px;border:1px solid rgba(210,222,240,.14);border-radius:17px 17px 17px 5px;background:rgba(255,255,255,.075);box-shadow:0 4px 14px rgba(0,0,0,.13)}
+.ringo-direct-thread .ringo-message p{margin:0;color:#eef2f8;font:13px/1.5 Arial,sans-serif;white-space:pre-wrap;overflow-wrap:anywhere}
+.ringo-direct-thread .ringo-message small{align-self:flex-end;color:#91a0b5;font:9px Arial,sans-serif}
+.ringo-direct-thread .ringo-message.is-own{align-self:flex-end;border-color:rgba(226,190,105,.38);border-radius:17px 17px 5px 17px;background:linear-gradient(145deg,rgba(176,137,62,.28),rgba(112,87,43,.20))}
+.ringo-direct-thread .ringo-message.is-own small{color:#e4ca91}
+.ringo-direct-thread .ringo-message.is-peer{align-self:flex-start}
+.ringo-direct-thread .ringo-compose{flex:none;gap:8px;margin:0;padding:9px;border:1px solid rgba(207,220,239,.16);border-radius:18px;background:rgba(255,255,255,.065);box-shadow:0 7px 20px rgba(0,0,0,.2),inset 0 1px 0 rgba(255,255,255,.08)}
+.ringo-direct-thread .ringo-compose input{height:44px;border:1px solid rgba(207,220,239,.13);border-radius:13px;background:rgba(5,11,20,.42);color:#fff}
+.ringo-direct-thread .ringo-compose input::placeholder{color:#8998ad}
+.ringo-direct-thread .ringo-compose button{min-width:74px;border-radius:13px;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.ringo-direct-thread .ringo-compose button:disabled{opacity:.55}
+.ringo-direct-thread .ringo-compose textarea{flex:1;min-width:0;height:44px;max-height:120px;padding:12px 13px;border:1px solid rgba(207,220,239,.13);border-radius:13px;background:rgba(5,11,20,.42);color:#fff;font:13px/1.45 Arial,sans-serif;resize:none;outline:0;box-sizing:border-box}
+.ringo-direct-thread .ringo-compose textarea::placeholder{color:#8998ad}
+.ringo-direct-thread .ringo-compose{align-items:flex-end}.ringo-direct-thread .ringo-compose button{height:44px}
+.ringo-dm-day{display:flex;justify-content:center;margin:6px 0 2px}.ringo-dm-day span{padding:4px 10px;border-radius:10px;background:rgba(255,255,255,.07);color:#aab7c9;font:10px Arial,sans-serif}
+.ringo-dm-seen{color:#f1d58a;font-weight:700}
+.ringo-direct-thread .ringo-message.is-pending{opacity:.7}
+.ringo-direct-thread .ringo-message.is-failed{border-color:rgba(214,92,88,.6)}
+.ringo-dm-retry{padding:0;border:0;background:none;color:#ff9b96;font:700 9px Arial,sans-serif;text-decoration:underline}
+.ringo-dm-older{align-self:center;flex:none;padding:6px 12px;border:1px solid rgba(207,220,239,.18);border-radius:11px;background:rgba(255,255,255,.06);color:#d9c38a;font:11px Arial,sans-serif}
+.ringo-dm-note{flex:none;margin:0 4px 7px;color:#ff9b96;font:11px Arial,sans-serif}
+.ringo-dm-back{margin-left:auto;padding:7px 11px;border:1px solid rgba(232,199,119,.35);border-radius:11px;background:rgba(255,255,255,.06);color:#f1d58a;font:700 11px Arial,sans-serif}
+.ringo-dm-side{display:flex;flex-direction:column;align-items:flex-end;gap:6px;flex:none;min-width:38px}
+.ringo-dm-side time{color:#8f9db1;font:10px Arial,sans-serif}
+.ringo-dm-count{min-width:18px;padding:3px 6px;border-radius:10px;background:linear-gradient(135deg,#f0d58a,#b58a3c);color:#211909;font:700 10px/1 Arial,sans-serif;font-style:normal;text-align:center;box-sizing:border-box}
+.ringo-direct-row.is-unread .ringo-direct-copy b{color:#fff}.ringo-direct-row.is-unread .ringo-direct-copy small{color:#e7edf6;font-weight:700}.ringo-direct-row.is-unread .ringo-dm-side time{color:#f1d58a}
+.ringo-dm-tick{margin-right:4px;color:#8f9db1;font-style:normal;letter-spacing:-2px}.ringo-dm-tick.is-seen{color:#f1d58a}
+@media(max-width:380px){.ringo-direct-list{padding-right:12px;padding-left:12px}.ringo-direct-thread{padding-right:9px;padding-left:9px}.ringo-direct-thread .ringo-compose{gap:5px;padding:6px}.ringo-direct-thread .ringo-compose button{min-width:62px;padding:0 9px}}
+/* Profil açılırken ilk yükleme ekranı: eski arka plan görünmesin, yeni tasarımın iskeleti görünsün */
+.profile-page:has(>.profile-card>.ringo-empty:only-child){background:#f7f4fc!important;background-image:none!important;padding:0 0 calc(110px + env(safe-area-inset-bottom))!important}
+.profile-page:has(>.profile-card>.ringo-empty:only-child):before{display:none!important}
+.profile-page:has(>.profile-card>.ringo-empty:only-child) .profile-card{max-width:560px!important;padding:0!important}
+.profile-page:has(>.profile-card>.ringo-empty:only-child) .profile-card:before{content:"";display:block;height:calc(390px + env(safe-area-inset-top));border-radius:0 0 30px 30px;background:linear-gradient(180deg,rgba(12,6,24,.10) 0%,rgba(12,6,24,.28) 38%,rgba(22,9,40,.86) 68%,#1f0b35 100%),var(--profile-bg) center top/cover no-repeat,#1f0b35}
+.profile-page:has(>.profile-card>.ringo-empty:only-child) .profile-card>.ringo-empty{margin:18px 0 0;color:#6e6787!important;text-align:center;text-shadow:none!important;font:700 13px Arial,sans-serif}
+/* === Ringo Açık Tema: Özel mesajlar (okuma alanı açık, gösteriş alanları koyu kalır) === */
+.ringo-layer.messages-fullscreen{--rl-bg:#f7f4fc;--rl-ink:#1c1830;--rl-sub:#6e6787;--rl-line:#e7e0f2;--rl-purple:#7b2fe0;--rl-purple2:#5a17b8;--rl-gold:#a8792a;background:var(--rl-bg)!important;color-scheme:light}
+.ringo-layer.messages-fullscreen .ringo-sheet{background:linear-gradient(180deg,#ece2fb 0,#f3edfc 150px,var(--rl-bg) 300px)!important;color:var(--rl-ink)}
+.ringo-layer.messages-fullscreen .ringo-sheet-head .ringo-back{border:1px solid #ddd2ef!important;background:#fff!important;color:var(--rl-purple)!important;box-shadow:0 2px 8px rgba(80,40,140,.10)!important}
+.ringo-layer.messages-fullscreen .ringo-direct-heading{color:var(--rl-ink)}
+.ringo-layer.messages-fullscreen .ringo-direct-heading span{color:var(--rl-sub)}
+.ringo-layer.messages-fullscreen .ringo-direct-search{border:1px solid var(--rl-line);background:#fff;box-shadow:0 2px 10px rgba(80,40,140,.06)}
+.ringo-layer.messages-fullscreen .ringo-direct-search>span{color:var(--rl-purple)}
+.ringo-layer.messages-fullscreen .ringo-direct-search input{color:var(--rl-ink)}
+.ringo-layer.messages-fullscreen .ringo-direct-search input::placeholder{color:#a39cb8}
+.ringo-layer.messages-fullscreen .ringo-direct-row{border-bottom:1px solid var(--rl-line);color:var(--rl-ink)}
+.ringo-layer.messages-fullscreen .ringo-direct-row:active{background:#efe8fa}
+.ringo-layer.messages-fullscreen .ringo-direct-avatar{border:2px solid #fff;background:linear-gradient(160deg,#9b5cf5,#5a17b8);color:#fff;box-shadow:0 0 0 1.5px var(--rl-gold),0 3px 10px rgba(60,20,120,.18)}
+.ringo-layer.messages-fullscreen .ringo-direct-copy b{color:var(--rl-ink)}
+.ringo-layer.messages-fullscreen .ringo-direct-copy small{color:var(--rl-sub)}
+.ringo-layer.messages-fullscreen .ringo-direct-row>em{color:#b9b1cc}
+.ringo-layer.messages-fullscreen .ringo-direct-row.is-unread .ringo-direct-copy b{color:#120d22}
+.ringo-layer.messages-fullscreen .ringo-direct-row.is-unread .ringo-direct-copy small{color:#2e2745;font-weight:700}
+.ringo-layer.messages-fullscreen .ringo-direct-row.is-unread .ringo-dm-side time{color:var(--rl-purple)}
+.ringo-layer.messages-fullscreen .ringo-dm-side time{color:#9a93ae}
+.ringo-layer.messages-fullscreen .ringo-dm-count{background:linear-gradient(180deg,#8f45f2,var(--rl-purple2));color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.35)}
+.ringo-layer.messages-fullscreen .ringo-dm-tick{color:#a39cb8}.ringo-layer.messages-fullscreen .ringo-dm-tick.is-seen{color:var(--rl-purple)}
+.ringo-layer.messages-fullscreen .ringo-empty{color:var(--rl-sub)}
+.ringo-layer.messages-fullscreen .ringo-thread-person{border-bottom:1px solid var(--rl-line)}
+.ringo-layer.messages-fullscreen .ringo-thread-person b{color:var(--rl-ink)}
+.ringo-layer.messages-fullscreen .ringo-thread-person small{color:var(--rl-sub)}
+.ringo-layer.messages-fullscreen .ringo-dm-back{border:1px solid #ddd2ef;background:#fff;color:var(--rl-purple)}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-message{border:1px solid var(--rl-line);background:#fff;box-shadow:0 2px 8px rgba(60,30,110,.07)}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-message p{color:var(--rl-ink)}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-message small{color:#9a93ae}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-message.is-own{border-color:transparent;background:linear-gradient(180deg,#9450f4 0%,var(--rl-purple) 45%,var(--rl-purple2) 100%);box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 3px 10px rgba(90,23,184,.22)}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-message.is-own p{color:#fff}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-message.is-own small{color:#e6d6ff}
+.ringo-layer.messages-fullscreen .ringo-dm-seen{color:#fff}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-message.is-failed{border-color:#e05a55}
+.ringo-layer.messages-fullscreen .ringo-dm-retry{color:#ffd9d7}
+.ringo-layer.messages-fullscreen .ringo-dm-day span{background:#ebe4f6;color:var(--rl-sub)}
+.ringo-layer.messages-fullscreen .ringo-dm-older{border:1px solid #ddd2ef;background:#fff;color:var(--rl-purple)}
+.ringo-layer.messages-fullscreen .ringo-dm-note{color:#c9302c}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-compose{border:1px solid var(--rl-line);background:#fff;box-shadow:0 4px 16px rgba(60,30,110,.08)}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-compose input,.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-compose textarea{border:1px solid var(--rl-line);background:#f4f0fa;color:var(--rl-ink)}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-compose input::placeholder,.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-compose textarea::placeholder{color:#a39cb8}
+.ringo-layer.messages-fullscreen .ringo-direct-thread .ringo-compose button{border:0;background:linear-gradient(180deg,#9450f4 0%,var(--rl-purple) 45%,var(--rl-purple2) 100%);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 3px 10px rgba(90,23,184,.22)}
+/* Game covers are assigned directly on each card in main-app.js. */
+/* Dedicated profile page */
+:root{--profile-bg:url('/assets/profile-background.jpg')}
+.profile-fab{display:none!important;position:fixed;right:16px;bottom:calc(82px + env(safe-area-inset-bottom));z-index:1000;width:56px;height:56px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.3);border-radius:18px;color:#fff;background:rgba(30,20,55,.55);backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 8px 24px #0008,inset 0 1px 1px #ffffff33;font-family:inherit;box-sizing:border-box}
+.profile-fab:active{transform:scale(.96)}
+.profile-page{position:fixed;inset:0;z-index:2000;display:flex;flex-direction:column;align-items:center;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;box-sizing:border-box;padding:calc(65px + env(safe-area-inset-top)) 18px calc(30px + env(safe-area-inset-bottom));background-color:#17102c;background-image:linear-gradient(180deg,rgba(15,10,35,.15),rgba(10,5,25,.7)),var(--profile-bg);background-position:center top;background-size:100% auto;background-repeat:no-repeat;background-attachment:local;color:#fff}.profile-page[hidden]{display:none!important}
+.profile-close{position:fixed;top:calc(18px + env(safe-area-inset-top));right:18px;z-index:5;width:42px;height:42px;border:1px solid rgba(255,255,255,.3);border-radius:50%;color:#fff;font:20px Arial,sans-serif;background:rgba(255,255,255,.12);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 5px 18px #0008}
+.profile-card{box-sizing:border-box;flex:0 0 auto;width:100%;max-width:430px;margin:clamp(190px,38vh,360px) auto 24px;padding:18px;border:1px solid rgba(255,255,255,.24);border-radius:26px;color:#fff;background:rgba(25,17,48,.62);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:0 18px 45px #0008,inset 0 1px 1px #ffffff2e}
+.profile-card .ringo-profile-hero{margin:0}.profile-card .ringo-profile-section:first-of-type{margin-top:12px}
+.profile-card .ringo-profile-hero{border-radius:18px}.profile-card .ringo-profile-section:first-of-type{margin-top:12px}@media(max-height:700px){.profile-card{margin-top:170px}}@media(min-width:600px){.profile-card{margin-top:clamp(220px,42vh,430px)}}
+/* Profile surfaces: matte frosted-glass finish; lift the complete button page */
+.profile-page{padding-top:calc(48px + env(safe-area-inset-top))}
+.profile-card{margin:0 auto 20px!important;background:rgba(17,20,31,.82);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-color:rgba(220,230,245,.22);box-shadow:0 10px 24px rgba(0,0,0,.28)}
+.profile-card .ringo-profile-hero,.profile-card .ringo-profile-section,.profile-card .ringo-profile-menu{background:rgba(22,27,40,.82)!important;background-image:none!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 5px 14px rgba(0,0,0,.20);border-color:rgba(220,230,245,.20)}
+.profile-card .ringo-profile-hero:after{display:none!important}
+.profile-card .ringo-profile-stat{background:rgba(31,39,55,.82)!important;background-image:none!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(220,230,245,.20);box-shadow:none}
+.profile-card .ringo-profile-menu button{background:rgba(39,47,63,.84)!important;background-image:none!important;backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-color:rgba(220,230,245,.22);box-shadow:none}
+.profile-card .ringo-profile-menu button.is-signout{background:rgba(65,35,48,.84)!important;background-image:none!important}
+/* Profile panel: extend 30px on each side and use the top gap */
+.profile-card{width:calc(100% + 60px);max-width:490px;transform:translate(-35px,-65px);background:transparent!important;background-image:none!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* Profile page: reveal the scenery; retain text, symbols and profile avatar */
+.profile-page{background-image:var(--profile-bg)!important;background-color:#17102c!important;background-position:40% top!important;background-size:cover!important;background-repeat:no-repeat!important;background-attachment:fixed!important;overflow-x:hidden!important;overflow-y:hidden!important;overscroll-behavior:none!important}
+.profile-card,.profile-card .ringo-profile-hero,.profile-card .ringo-profile-section,.profile-card .ringo-profile-stat,.profile-card .ringo-profile-menu,.profile-card .ringo-profile-menu button{background:transparent!important;background-color:transparent!important;background-image:none!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.profile-card .ringo-profile-hero:after{display:none!important}
+.profile-card .ringo-profile-motto{background:transparent!important;border-left:0!important;border-right:0!important}
+.profile-card .ringo-profile-menu button{padding-left:0;padding-right:0}
+.profile-close{background:transparent!important;border-color:transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+/* Strong profile typography, prominent account status, and remove the top close glyph */
+.profile-close{display:none!important}
+.profile-card,.profile-card *{text-shadow:0 1px 3px rgba(0,0,0,.82)!important;-webkit-text-stroke:0!important}
+.profile-card .ringo-profile-identity-copy>b,.profile-card .ringo-profile-stat>b{color:#fff!important;font-weight:900!important}
+.profile-card .ringo-profile-identity-copy>small,.profile-card .ringo-profile-identity-copy>p,.profile-card .ringo-profile-stat span,.profile-card .ringo-profile-stat small,.profile-card .ringo-profile-stat-note,.profile-card .ringo-profile-achievements p{color:#fff!important;font-weight:800!important}
+.profile-card .ringo-profile-menu button,.profile-card .ringo-profile-menu button.is-signout{color:#fff!important;font-weight:800!important}
+.profile-card .ringo-profile-section-title,.profile-card .ringo-profile-brand,.profile-card .ringo-profile-motto,.profile-card .ringo-profile-menu button>span,.profile-card .ringo-profile-menu button>em{color:#ffe39a!important}
+.profile-card .ringo-profile-status{margin-right:-16px;gap:8px;padding:9px 12px;border:1px solid rgba(111,255,160,.95);border-radius:999px;background:rgba(0,25,12,.88);color:#8dffad!important;font:800 13px/1 Arial,sans-serif!important;letter-spacing:.25px;text-shadow:0 0 5px #003b18,0 0 12px #00ff66!important;-webkit-text-stroke:0!important;box-shadow:0 0 12px rgba(54,237,121,.55),inset 0 0 10px rgba(54,237,121,.18)}
+.profile-card .ringo-profile-status i{width:10px;height:10px;flex:0 0 10px;background:#45ff83;box-shadow:0 0 5px #45ff83,0 0 13px #00ff66}
+/* Very subtle glass tint beneath profile text; suppress remaining card-edge lines */
+.profile-card .ringo-profile-hero,.profile-card .ringo-profile-section,.profile-card .ringo-profile-menu{background:rgba(12,20,36,.16)!important;border:0!important;box-shadow:0 3px 10px rgba(0,0,0,.10)!important}
+.profile-card .ringo-profile-stat{background:rgba(12,24,43,.20)!important;border:0!important;box-shadow:none!important}
+.profile-card .ringo-profile-menu button,.profile-card .ringo-profile-menu button.is-signout{background:rgba(12,22,39,.18)!important;border:0!important;box-shadow:none!important}
+.profile-card .ringo-profile-motto{border-top:0!important;border-bottom:0!important}
+/* Second matching 20% profile typography lift; keep cards and layout unchanged */
+.profile-card .ringo-profile-identity-copy>b{font-size:28.8px!important}
+.profile-card .ringo-profile-identity-copy>small,.profile-card .ringo-profile-identity-copy>p{font-size:15.6px!important}
+.profile-card .ringo-profile-motto{font-size:17.28px!important}
+.profile-card .ringo-profile-section-title{font-size:15.84px!important}
+.profile-card .ringo-profile-stat span{font-size:14.4px!important}
+.profile-card .ringo-profile-stat>b{font-size:33.6px!important}
+.profile-card .ringo-profile-stat small{font-size:13.2px!important}
+.profile-card .ringo-profile-stat-note{font-size:14.4px!important}
+.profile-card .ringo-profile-achievements p{font-size:15.6px!important}
+.profile-card .ringo-profile-menu button>b{font-size:16.8px!important}
+.profile-card .ringo-profile-brand{font-size:24px!important}
+/* Profile subpages use the same enlarged white type as v49. */
+.profile-card .ringo-profile-subview{max-height:68vh;overflow-y:auto;padding:12px 4px 20px;color:#fff;font:700 16px/1.55 Arial,sans-serif}
+.profile-card .ringo-profile-subview h2{margin:8px 0 14px;color:#ffe39a;font-size:24px;font-weight:900}
+.profile-card .ringo-profile-subview h3{font-size:18px;color:#ffe39a}
+.profile-card .ringo-profile-subview p,.profile-card .ringo-profile-subview small{font-size:15.6px;line-height:1.55;color:#fff}
+.profile-card .ringo-profile-subview label{display:block;margin:13px 0;color:#fff;font-size:16px;font-weight:800}
+.profile-card .ringo-profile-subview input:not([type=checkbox]):not([type=file]),.profile-card .ringo-profile-subview textarea,.profile-card .ringo-profile-subview select{display:block;box-sizing:border-box;width:100%;margin-top:7px;padding:12px;border:1px solid #ffffff55;border-radius:12px;background:#101a2ddd;color:#fff;font:700 16px/1.4 Arial,sans-serif}
+.profile-card .ringo-profile-subview input[type=file]{display:block;width:100%;margin-top:8px;color:#fff;font-size:15px}
+.profile-card .ringo-profile-subview input[type=checkbox]{width:22px;height:22px;accent-color:#e9c875}
+.profile-card .ringo-profile-primary,.profile-card .ringo-profile-danger,.profile-card .ringo-profile-subback{min-height:46px;padding:10px 15px;border:1px solid #f1d58a88;border-radius:13px;background:#d8b45d22;color:#fff;font:800 16px/1.35 Arial,sans-serif}
+.profile-card .ringo-profile-danger{border-color:#e78b8b;background:#6e263caa}
+.profile-card .ringo-profile-subback{margin-bottom:8px;background:#ffffff18;border-color:#ffffff44}
+.profile-card .ringo-profile-feedback{min-height:24px;color:#ffe39a!important;font-size:15px!important}
+.profile-card .ringo-profile-choice{display:flex!important;align-items:center;justify-content:space-between;gap:12px}
+.profile-card .ringo-profile-photo-preview{width:112px;height:112px;margin:12px 0;border:1px solid #ffffff66;border-radius:50%;overflow:hidden;display:grid;place-items:center;background:#172238;color:#fff;font-size:14px}
+.profile-card .ringo-profile-photo-preview img{width:100%;height:100%;object-fit:cover}
+.profile-card .ringo-profile-passkey{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid #ffffff33}
+.profile-card .ringo-profile-passkey b{display:block;font-size:16px;color:#fff}
+.profile-card .ringo-profile-passkey small{display:block;font-size:13px}
+.profile-card .ringo-profile-passkey button{padding:8px 12px;border:1px solid #ffffff55;border-radius:10px;background:#ffffff18;color:#fff;font-size:15px}
+/* Durum ekranı: Neon Salon görseli; profil arka planından tamamen bağımsızdır. */
+.status-page{position:fixed;inset:0;z-index:1900;background-color:#090b12;background-image:url('/assets/status-neon-lounge.jpg');background-position:center center;background-size:cover;background-repeat:no-repeat;}
+.status-page[hidden]{display:none!important}
+/* Ringo Status Stories — left translucent glass rail; background remains untouched. */
+.status-page{overflow:hidden!important}
+.ringo-story-rail{position:absolute;z-index:2;left:0;top:0;bottom:0;width:min(280px,calc(72vw + 40px));display:flex;flex-direction:column;padding:calc(18px + env(safe-area-inset-top)) 11px calc(18px + env(safe-area-inset-bottom));color:#000;background:transparent;border-right:1px solid rgba(170,225,255,.10);box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none;font-family:Arial,sans-serif}
+.ringo-story-brand{display:flex;align-items:center;gap:9px;padding:2px 1px 17px}
+.ringo-story-mark{width:34px;height:34px;display:grid;place-items:center;border:1px solid rgba(128,220,255,.75);border-radius:11px;color:#b8f0ff;font:900 19px Georgia,serif;background:linear-gradient(145deg,rgba(54,180,255,.28),rgba(93,74,220,.22));box-shadow:0 0 16px rgba(55,190,255,.20),inset 0 1px 1px #ffffff55}
+.ringo-story-brand b{display:block;font:900 16px/1 Arial,sans-serif;letter-spacing:2px}
+.ringo-story-brand small{display:block;margin-top:5px;color:#000;font:800 10px Arial,sans-serif;letter-spacing:1.2px}
+.ringo-story-create{width:100%;min-height:58px;display:flex;align-items:center;gap:9px;padding:8px;border:1px solid rgba(119,220,255,.52);border-radius:14px;text-align:left;background:linear-gradient(130deg,rgba(40,153,211,.28),rgba(89,79,183,.22));box-shadow:0 7px 18px rgba(0,0,0,.18),inset 0 1px 1px rgba(255,255,255,.18);color:#000}
+.ringo-story-plus{width:30px;height:30px;flex:0 0 30px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.55);border-radius:50%;background:rgba(76,190,255,.22);font:22px Arial,sans-serif;color:#d5f8ff}
+.ringo-story-create b{display:block;font:900 14px Arial,sans-serif}
+.ringo-story-create small{display:block;margin-top:4px;color:#000;font:700 11px Arial,sans-serif}
+.ringo-story-divider{height:1px;margin:17px 1px 13px;background:linear-gradient(90deg,rgba(121,218,255,.48),transparent)}
+.ringo-story-heading{margin:0 2px 10px;color:#000;font:900 11px Arial,sans-serif;letter-spacing:1.2px}
+.ringo-story-feed{min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;scrollbar-color:rgba(154,220,255,.35) transparent}
+.ringo-story-item{width:100%;display:flex;align-items:center;gap:8px;margin:0 0 7px;padding:7px 5px;border:1px solid rgba(255,255,255,.10);border-radius:12px;background:transparent;color:#000;text-align:left;backdrop-filter:none;-webkit-backdrop-filter:none}
+.ringo-story-avatar{width:32px;height:32px;flex:0 0 32px;display:grid;place-items:center;border:1.5px solid #80dcff;border-radius:50%;background:linear-gradient(145deg,rgba(39,174,232,.55),rgba(104,74,183,.5));box-shadow:0 0 10px rgba(64,194,255,.2);font:800 13px Arial,sans-serif}
+.ringo-story-item-copy{min-width:0;flex:1}.ringo-story-item-copy b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:900 14px Arial,sans-serif}.ringo-story-item-copy small{display:block;margin-top:4px;color:#000;font:700 11px Arial,sans-serif}.ringo-story-item>i{color:#000;font:900 24px Arial,sans-serif;font-style:normal}
+.ringo-story-empty,.ringo-story-loading{padding:13px 8px;border:1px solid rgba(255,255,255,.12);border-radius:12px;background:rgba(7,17,34,.18);color:#000;font:800 13px/1.6 Arial,sans-serif;text-align:center}
+.ringo-story-foot{padding-top:10px;color:#000;font:800 10px Arial,sans-serif;text-align:center;letter-spacing:.3px}
+.ringo-story-composer{position:absolute;z-index:5;left:190px;top:auto;bottom:18px;transform:none;width:min(260px,calc(100vw - 200px));max-height:calc(100% - 36px);overflow-y:auto;padding:12px;border:1px solid rgba(139,224,255,.48);border-radius:16px;background:rgba(9,19,39,.78);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);box-shadow:0 14px 35px rgba(0,0,0,.32);font-family:Arial,sans-serif}\n.ringo-story-media-actions{display:flex;gap:8px;margin-top:10px}.ringo-story-media-actions button{flex:1;padding:10px 8px;border:1px solid rgba(139,224,255,.48);border-radius:10px;background:rgba(83,154,204,.18);color:#fff;font:800 12px Arial,sans-serif}.ringo-story-preview{margin-top:10px;max-height:190px;overflow:hidden;border:1px solid rgba(139,224,255,.35);border-radius:12px}.ringo-story-preview[hidden]{display:none}.ringo-story-preview img,.ringo-story-preview video{display:block;width:100%;max-height:190px;object-fit:contain;background:rgba(0,0,0,.25)}#ringoStoryViewerMedia img,#ringoStoryViewerMedia video{display:block;max-width:100%;max-height:52vh;object-fit:contain;margin:12px auto;border-radius:12px}\n.ringo-story-composer[hidden]{display:none!important}
+.ringo-story-composer-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;color:#fff;font-size:13px}.ringo-story-composer-head button,.ringo-story-viewer-close{width:30px;height:30px;border:1px solid rgba(255,255,255,.28);border-radius:50%;background:rgba(255,255,255,.10);color:#fff;font:20px Arial,sans-serif}
+.ringo-story-composer textarea{display:block;width:100%;min-height:105px;resize:vertical;padding:10px;border:1px solid rgba(255,255,255,.24);border-radius:11px;background:rgba(3,10,23,.38);color:#fff;font:12px/1.5 Arial,sans-serif;outline:none}
+.ringo-story-compose-bottom{display:flex;align-items:center;justify-content:space-between;margin-top:9px}.ringo-story-compose-bottom small,.ringo-story-feedback{color:#c6d9e9;font:9px Arial,sans-serif}.ringo-story-compose-bottom button{padding:8px 13px;border:1px solid rgba(142,229,255,.6);border-radius:10px;background:linear-gradient(135deg,rgba(52,171,220,.55),rgba(94,85,193,.55));color:#fff;font:700 10px Arial,sans-serif}.ringo-story-compose-bottom button:disabled{opacity:.55}.ringo-story-feedback{margin:8px 0 0;min-height:12px}
+.ringo-story-viewer{position:absolute;z-index:40;inset:0;display:flex;align-items:center;justify-content:center;padding:24px;background:rgba(3,7,17,.74);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.ringo-story-viewer[hidden],.ringo-story-composer[hidden]{display:none!important}
+.ringo-story-viewer-close{position:absolute;top:calc(18px + env(safe-area-inset-top));right:18px;width:42px;height:42px}
+.ringo-story-viewer-card{width:min(430px,calc(100% - 24px));min-height:min(68vh,520px);display:flex;flex-direction:column;justify-content:center;padding:28px 22px;border:1px solid rgba(139,224,255,.48);border-radius:24px;background:linear-gradient(145deg,rgba(22,49,78,.78),rgba(26,22,62,.72));box-shadow:0 18px 55px rgba(0,0,0,.4),inset 0 1px 1px rgba(255,255,255,.18);color:#fff;text-align:center}
+.ringo-story-viewer-card small{color:#b8eaff;font:700 11px Arial,sans-serif}.ringo-story-viewer-card p{font:600 clamp(19px,5vw,28px)/1.5 Georgia,serif;overflow-wrap:anywhere}.ringo-story-viewer-card time{margin-top:20px;color:#c2d8e9;font:10px Arial,sans-serif}
+@media(max-width:360px){.ringo-story-rail{width:210px;padding-left:9px;padding-right:9px}.ringo-story-composer{left:178px;width:calc(100vw - 186px)}}
+.profile-close{display:flex!important;left:18px;right:auto;align-items:center;justify-content:center;font-size:27px!important;line-height:1;cursor:pointer}
+.ringo-status-back{position:absolute;z-index:30;top:calc(18px + env(safe-area-inset-top));right:18px;left:auto;width:42px;height:42px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(255,255,255,.35);border-radius:50%;background:rgba(12,18,35,.48);color:#fff;font:27px/1 Arial,sans-serif;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 5px 18px rgba(0,0,0,.35);cursor:pointer}
+.ringo-discover-home-card{position:relative;isolation:isolate;display:flex;align-items:center;gap:14px;width:100%;min-height:136px;overflow:hidden;padding:18px 16px;border:1px solid rgba(255,220,130,.9);border-radius:20px;text-align:left;background:radial-gradient(ellipse at 10% 50%,rgba(42,201,220,.38),transparent 44%),radial-gradient(ellipse at 88% 12%,rgba(146,73,255,.52),transparent 40%),linear-gradient(115deg,#071c2a,#10132b 55%,#24123a);box-shadow:0 0 0 1px rgba(75,184,220,.35),0 0 22px rgba(55,174,207,.25),0 13px 28px #000b,inset 0 1px 2px #ffffff30;color:#fff}.ringo-discover-home-card:before{content:"";position:absolute;z-index:-1;inset:5px;border:1px solid rgba(255,224,153,.42);border-radius:15px;pointer-events:none}.discover-orbit{flex:0 0 76px;width:76px;height:76px;display:grid;place-items:center;border:1px solid #83e8efaa;border-radius:24px;background:radial-gradient(circle at 35% 25%,#74e3e777,#2a5e8177 48%,#19112e);color:#fff1b4;font:48px Georgia,serif;text-shadow:0 0 14px #63e6f2,0 0 24px #a05cff;box-shadow:0 0 22px #46cde955,inset 0 1px 9px #ffffff2b}.discover-home-copy{position:relative;z-index:1;flex:1;min-width:0}.discover-home-copy b{display:block;color:#f8e5b0;font:900 clamp(23px,6vw,31px)/1.05 Georgia,serif;letter-spacing:.4px;text-shadow:0 0 12px #52dce6aa,0 0 22px #a35aff77}.discover-home-copy small{display:block;margin-top:9px;color:#d9edf2;font:600 11px/1.5 Arial,sans-serif}.discover-home-arrow{flex:0 0 42px;width:42px;height:42px;display:grid;place-items:center;border:1px solid #ffe1a0;border-radius:50%;background:#ffffff12;color:#ffe6a8;font:900 30px Arial,sans-serif;box-shadow:0 0 15px #6bdce766}.ringo-discover-home-card:active{filter:brightness(1.15);transform:translateY(1px)}@media(max-width:380px){.ringo-discover-home-card{min-height:120px;gap:10px;padding:14px 11px}.discover-orbit{flex-basis:64px;width:64px;height:64px;font-size:40px}.discover-home-copy small{font-size:10px}.discover-home-arrow{flex-basis:36px;width:36px;height:36px}}
+/* RİNGO KEŞFET ana kartı: PK kartıyla aynı 4:5 ölçü oranı; yalnızca bu karta uygulanır. */
+#homeDiscoverSection .ringo-discover-home-card{width:100%;aspect-ratio:4/5;min-height:0;height:auto;padding:0;display:block;overflow:hidden;background:#09080c}#homeDiscoverSection .discover-card-art{position:absolute;z-index:1;inset:0;width:100%;height:100%;display:block;object-fit:contain;object-position:center}#homeDiscoverSection .ringo-discover-home-card:before{z-index:2;pointer-events:none}
+/* Ringo social profile: scrollable glass surfaces, preserving the original background asset. */
+.profile-page{overflow-x:hidden!important;overflow-y:auto!important;overscroll-behavior:contain!important;background-attachment:scroll!important}
+.profile-card{width:100%!important;max-width:520px!important;transform:none!important;margin:0 auto 22px!important;padding:12px!important}
+.profile-card .ringo-profile-hero,.profile-card .ringo-profile-section,.profile-card .ringo-profile-menu{background:rgba(17,24,40,.46)!important;background-image:none!important;border:1px solid rgba(255,255,255,.2)!important;backdrop-filter:blur(15px)!important;-webkit-backdrop-filter:blur(15px)!important;box-shadow:0 10px 24px rgba(0,0,0,.22),inset 0 1px 0 rgba(255,255,255,.12)!important}
+.profile-card .ringo-profile-menu button{background:rgba(255,255,255,.08)!important;border:1px solid rgba(255,255,255,.18)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important}
+.ringo-profile-post-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
+.ringo-profile-post-tile{position:relative;min-width:0;aspect-ratio:1;overflow:hidden;border:1px solid rgba(255,255,255,.18);border-radius:11px;background:rgba(255,255,255,.07)}
+.ringo-profile-post-tile img,.ringo-profile-post-tile video{width:100%;height:100%;object-fit:cover;display:block}
+.ringo-profile-post-tile>span{height:100%;display:grid;place-items:center;color:#f1d58a;font:700 13px Georgia,serif}
+.ringo-profile-post-tile small{position:absolute;left:0;right:0;bottom:0;max-height:38%;overflow:hidden;padding:15px 5px 5px;background:linear-gradient(transparent,#000b);color:#fff;font:9px/1.25 Arial,sans-serif}
+.ringo-profile-posts .ringo-profile-primary{display:block;width:100%;margin-top:10px;padding:11px;border:1px solid rgba(255,220,130,.6);border-radius:12px;background:rgba(255,255,255,.1);color:#ffe7aa;font:700 12px Arial,sans-serif}
+
+.ringo-profile-settings{margin-top:12px;border:1px solid rgba(255,255,255,.2);border-radius:15px;background:rgba(10,16,30,.34);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);overflow:hidden}.ringo-profile-settings>summary{padding:13px 14px;color:#f5dda0;font:700 12px Arial,sans-serif;cursor:pointer;list-style:none}.ringo-profile-settings>summary::-webkit-details-marker{display:none}.ringo-profile-settings>summary:after{content:"＋";float:right;color:#f5dda0}.ringo-profile-settings[open]>summary:after{content:"−"}.ringo-profile-settings .ringo-profile-menu{margin:0;padding:8px;border:0;border-top:1px solid rgba(255,255,255,.12);border-radius:0;background:transparent!important}
+/* Integrated profile connections, friend requests and personal activity */
+.profile-card .ringo-profile-stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ringo-connection-view h3{margin:18px 0 8px;color:#ffe39a;font:800 14px Arial,sans-serif}
+.ringo-connection-list{display:grid;gap:8px;margin:8px 0 15px}
+.ringo-connection-row{display:flex;align-items:center;gap:9px;min-width:0;padding:9px;border:1px solid rgba(255,255,255,.17);border-radius:14px;background:rgba(10,19,35,.42);box-shadow:0 5px 14px rgba(0,0,0,.14),inset 0 1px 0 rgba(255,255,255,.06)}
+.ringo-connection-avatar{display:grid;place-items:center;flex:0 0 42px;width:42px;height:42px;border:1px solid rgba(245,211,133,.6);border-radius:50%;object-fit:cover;background:linear-gradient(145deg,#31547d,#111d35);color:#ffe39a;font:800 17px Arial,sans-serif}
+.ringo-connection-person-name{flex:1;min-width:0;overflow-wrap:anywhere;color:#fff;font:800 13px/1.3 Arial,sans-serif}
+.ringo-connection-actions{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:5px;max-width:58%}
+.ringo-connection-action{min-height:31px;padding:6px 8px;border:1px solid rgba(238,207,135,.35);border-radius:9px;background:rgba(255,255,255,.09);color:#fff;font:700 10px/1.2 Arial,sans-serif}
+.ringo-connection-action:disabled{opacity:.65}
+.ringo-people-search{display:flex;align-items:center;gap:8px;margin:8px 0 14px}
+.ringo-people-search input{flex:1;min-width:0}
+.ringo-people-search .ringo-profile-primary{flex:none;min-width:76px}
+.ringo-profile-history{display:grid;gap:9px;margin-top:10px}
+.ringo-profile-history-row{display:flex;align-items:flex-start;gap:11px;padding:10px;border:1px solid rgba(255,255,255,.15);border-radius:13px;background:rgba(10,19,35,.4)}
+.ringo-profile-history-icon{display:grid;place-items:center;flex:0 0 34px;width:34px;height:34px;border:1px solid rgba(241,213,138,.38);border-radius:11px;background:rgba(241,213,138,.1);color:#ffe39a;font:700 17px Arial,sans-serif}
+.ringo-profile-history-row>div{flex:1;min-width:0}
+.ringo-profile-history-row b{display:block;color:#ffe39a;font:800 12px/1.35 Arial,sans-serif}
+.ringo-profile-history-row p{margin:4px 0;color:#fff;font:600 12px/1.45 Arial,sans-serif;overflow-wrap:anywhere}
+.ringo-profile-history-row small{color:#b9c8dd;font:10px Arial,sans-serif}
+@media(max-width:390px){.profile-card .ringo-profile-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.ringo-connection-row{flex-wrap:wrap}.ringo-connection-person-name{min-width:calc(100% - 60px)}.ringo-connection-actions{width:100%;max-width:none;justify-content:flex-start;padding-left:51px}.ringo-connection-action{font-size:9px}.ringo-people-search{align-items:stretch;flex-direction:column}}
+/* Profil v2 (2026-11-14): resimdeki sahte ikonlar kırpıldı, okunur üst bar, maskot için alt pay,
+   kompakt ve tıklanabilir istatistikler, hızlı düzenleme butonları, iç içe kaydırma kaldırıldı. */
+:root{--profile-bg:url('/assets/profile-background-v2.jpg')}
+.profile-page{padding:calc(70px + env(safe-area-inset-top)) 14px calc(150px + env(safe-area-inset-bottom))!important;background-position:center top!important}
+.profile-page:before{content:"";position:fixed;left:0;right:0;top:0;height:calc(66px + env(safe-area-inset-top));z-index:4;pointer-events:none;background:linear-gradient(180deg,rgba(12,8,26,.9),rgba(12,8,26,.55) 62%,rgba(12,8,26,0))}
+.profile-close{top:calc(12px + env(safe-area-inset-top))!important;left:14px!important;z-index:6!important;width:42px!important;height:42px!important;border:1px solid rgba(186,118,255,.5)!important;background:rgba(30,16,52,.74)!important;box-shadow:0 4px 14px rgba(0,0,0,.4)!important;backdrop-filter:blur(10px)!important;-webkit-backdrop-filter:blur(10px)!important;font-size:22px!important}
+.profile-card .ringo-profile-subview{max-height:none!important;overflow:visible!important}
+.profile-card .ringo-profile-quick{display:flex;gap:8px;margin-top:14px}
+.profile-card .ringo-profile-quick button{flex:0 0 46px;height:44px;padding:0;border:1px solid rgba(186,118,255,.45);border-radius:13px;background:rgba(42,20,72,.6);color:#fff;font:800 18px/1 Arial,sans-serif;cursor:pointer}
+.profile-card .ringo-profile-quick button.is-main{flex:1;border-color:rgba(214,170,82,.8);background:linear-gradient(145deg,rgba(122,86,24,.88),rgba(58,36,8,.92));color:#ffe9b0;font-size:15px}
+.profile-card .ringo-profile-quick button:active,.profile-card .ringo-profile-stat:active{transform:scale(.96)}
+.profile-card .ringo-profile-stats{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important}
+.profile-card .ringo-profile-stat{display:flex!important;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-width:0;padding:10px 2px!important;border-radius:13px;color:#fff;font:inherit;text-align:center;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.profile-card .ringo-profile-stat>b{order:-1;font-size:24px!important;line-height:1.1}
+.profile-card .ringo-profile-stat span{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px!important;font-weight:700!important}
+.profile-card .ringo-profile-stat small{display:none!important}
+.profile-card .ringo-profile-stats+.ringo-profile-stat-note{display:none!important}
+/* Profil açıkken ana ekran arkada tamamen gizlenir ve kaydırılamaz: telefon tarayıcı çubuğu
+   açılıp kapanırken ya da sayfa sonunda esneyince alttan ana ekran görünmez. */
+html.ringo-profile-open,html.ringo-profile-open body{overflow:hidden!important;overscroll-behavior:none!important}
+html.ringo-profile-open main.app{visibility:hidden!important}
+.profile-page{height:100vh;height:100dvh;box-shadow:0 0 0 100vmax #17102c!important}
+@media(max-width:360px){.profile-card .ringo-profile-stat>b{font-size:21px!important}.profile-card .ringo-profile-stat span{font-size:11px!important}}
+/* Rozet (avatar çerçevesi) */
+.ringo-avatar-badge{--av:76px;font-style:normal;position:relative;display:grid;place-items:center;flex:0 0 auto;width:calc(var(--av)*1.97);height:calc(var(--av)*3.03);margin:calc(var(--av)*-.62) calc(var(--av)*-.2)}
+.ringo-avatar-badge>.ringo-badge-frame{position:absolute;inset:0;width:100%;height:100%;max-width:none;object-fit:contain;pointer-events:none;z-index:2}
+.ringo-avatar-badge>:not(.ringo-badge-frame){width:var(--av)!important;height:var(--av)!important;min-width:0!important;flex:0 0 var(--av)!important;margin:0!important;border:0!important;box-shadow:none!important;border-radius:50%!important;object-fit:cover}
+/* Rozet mağazası */
+.profile-card .ringo-profile-quick button.is-badge{color:#f1d58a;font-size:20px}
+.profile-card .ringo-profile-hero:has(.ringo-avatar-badge),.profile-card .ringo-profile-identity:has(.ringo-avatar-badge){overflow:visible}
+.profile-card .ringo-profile-identity:has(.ringo-avatar-badge){margin:56px 0 46px}
+.ringo-badge-store h2{margin-bottom:10px!important}
+.ringo-badge-wallet{display:flex;align-items:center;justify-content:space-between;padding:12px 14px;border:1px solid rgba(186,118,255,.45);border-radius:14px;background:rgba(42,20,72,.55)}
+.ringo-badge-wallet span{font-size:14px!important;color:#e6dcf5}.ringo-badge-wallet b{color:#ffe39a;font:900 22px Arial,sans-serif}
+.profile-card .ringo-badge-note{margin:10px 0 12px;font-size:13px!important;line-height:1.45;color:#d8cde8!important}
+.ringo-badge-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.ringo-badge-tabs::-webkit-scrollbar{display:none}
+.ringo-badge-tabs button{flex:none;padding:8px 12px;border:1px solid rgba(186,118,255,.4);border-radius:999px;background:rgba(30,16,52,.6);color:#e9defa;font:800 13px Arial,sans-serif}
+.ringo-badge-tabs button.is-active{border-color:rgba(214,170,82,.85);background:linear-gradient(145deg,rgba(122,86,24,.9),rgba(58,36,8,.95));color:#ffe9b0}
+.ringo-badge-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:6px}
+.ringo-badge-card{display:flex;flex-direction:column;align-items:center;gap:6px;min-width:0;padding:10px 8px;border:1px solid rgba(186,118,255,.3);border-radius:16px;background:rgba(20,10,36,.55);text-align:center}
+.ringo-badge-card.is-equipped{border-color:rgba(214,170,82,.9);box-shadow:0 0 0 1px rgba(214,170,82,.35) inset}
+.ringo-badge-card .ringo-avatar-badge{margin:0}
+.ringo-badge-avatar{display:grid;place-items:center;background:linear-gradient(145deg,#3a2a5c,#140c26);color:#f1d58a;font:800 22px Georgia,serif}
+.ringo-badge-card>b{max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#fff;font:900 14px Arial,sans-serif}
+.ringo-badge-card>em{font:700 12px Arial,sans-serif;font-style:normal;color:#c9b8e6}.ringo-badge-card>em.is-perm{color:#ffe39a}
+.ringo-badge-actions{display:grid;gap:6px;width:100%}
+.ringo-badge-actions button{min-height:36px;padding:6px;border:1px solid rgba(186,118,255,.45);border-radius:11px;background:rgba(42,20,72,.7);color:#fff;font:800 12px/1.2 Arial,sans-serif}
+.ringo-badge-actions button.is-perm{border-color:rgba(214,170,82,.8);background:linear-gradient(145deg,rgba(122,86,24,.85),rgba(58,36,8,.92));color:#ffe9b0}
+.ringo-badge-actions button.is-equip{border-color:rgba(111,255,160,.7);background:rgba(0,40,20,.6);color:#9dffbb}
+.ringo-badge-actions button.is-on{border-color:rgba(214,170,82,.6);background:rgba(255,255,255,.08);color:#ffe39a}
+.ringo-badge-actions button:disabled{opacity:.55}
+/* Odalarda kişiler: isim, fotoğraf, takılı rozet */
+.ringo-person-avatar{font-style:normal;display:grid;place-items:center;flex:none;border-radius:50%;object-fit:cover;background:linear-gradient(145deg,#3a2a5c,#140c26);color:#f1d58a;font-weight:800;font-family:Georgia,serif;box-sizing:border-box}
+.ringo-message.ringo-message-with-avatar{display:grid!important;grid-template-columns:28px minmax(0,1fr);column-gap:8px;align-items:start}
+.ringo-message-with-avatar>.ringo-person-avatar,.ringo-message-with-avatar>.ringo-avatar-badge{grid-row:1/span 3;grid-column:1}
+.ringo-message-with-avatar>:not(.ringo-person-avatar):not(.ringo-avatar-badge){grid-column:2}
+.ringo-room-people{display:flex;gap:0;overflow-x:auto;overflow-y:hidden;padding:0 2px;margin:2px 0 4px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.ringo-room-people::-webkit-scrollbar{display:none}
+.ringo-room-person{flex:0 0 64px;display:flex;flex-direction:column;align-items:center;min-width:0}
+.ringo-room-person-stage{display:grid;place-items:center;width:64px;height:98px}
+.ringo-room-people .ringo-avatar-badge{margin:0}
+.ringo-room-person:not(.has-badge) .ringo-person-avatar{border:2px solid rgba(186,118,255,.6)}
+.ringo-room-person small{max-width:62px;margin-top:-8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#efe6ff;font:700 10px/1.2 Arial,sans-serif;text-shadow:0 1px 2px #000}
+.ringo-pk-slot-person{position:absolute;inset:0;z-index:0;display:grid;place-items:center;pointer-events:none}
+.ringo-agency-stage-slot.has-person>span{position:absolute!important;left:7px!important;top:7px!important;bottom:auto!important;z-index:2}
+.ringo-agency-stage-slot.has-person>small{position:absolute;left:0;right:0;bottom:8px;z-index:2;text-align:center}
+.ringo-agency-stage-slot video{z-index:1}
+.ringo-pk-slot-person .ringo-avatar-badge{margin:0}
+/* Rütbe ve VIP etiketleri: küçük, parlak cilalı (mor kadife, siyah mermer, koyu altın vurgu, neon mor çizgi) */
+.ringo-tags{display:inline-flex;align-items:center;gap:3px;vertical-align:middle;margin-left:4px}
+.ringo-tag{display:inline-flex;align-items:center;gap:2px;height:15px;padding:0 5px;border-radius:5px;font:900 9px/1 Arial,sans-serif;font-style:normal;letter-spacing:.3px;white-space:nowrap;color:#fff;border:1px solid rgba(255,255,255,.18);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 -2px 3px rgba(0,0,0,.35);text-shadow:0 1px 1px rgba(0,0,0,.55)}
+.ringo-tag b{font-weight:900;font-size:8px;opacity:.9}
+.ringo-tag-vip.v1{background:linear-gradient(180deg,#5b3a8c,#2c1650);border-color:rgba(186,118,255,.45)}
+.ringo-tag-vip.v2{background:linear-gradient(180deg,#7c45c9,#3b1670);border-color:rgba(200,140,255,.6)}
+.ringo-tag-vip.v3{background:linear-gradient(180deg,#8f4fe0,#40157a);border-color:#b98a3a;color:#ffe9b0}
+.ringo-tag-vip.v4{background:linear-gradient(180deg,#2a2233,#0b0710);border-color:#c79a45;color:#f3d48c}
+.ringo-tag-vip.v5{background:linear-gradient(180deg,#a2741f,#5a3a0a);border-color:#c38bff;color:#fff4d6;box-shadow:inset 0 1px 0 rgba(255,255,255,.35),0 0 0 1px rgba(170,90,255,.55)}
+.ringo-tag-role{background:linear-gradient(180deg,#3a2a5c,#1a1030);border-color:rgba(186,118,255,.45)}
+.ringo-tag-role.is-assistant{background:linear-gradient(180deg,#3d3d6e,#1d1d3c)}
+.ringo-tag-role.is-moderator{background:linear-gradient(180deg,#6a2fb8,#32106a);border-color:#b07cff}
+.ringo-tag-role.is-manager{background:linear-gradient(180deg,#2a2233,#0b0710);border-color:#c79a45;color:#f3d48c}
+.ringo-tag-role.is-owner{background:linear-gradient(180deg,#9c6d1c,#4e3207);border-color:#e0b862;color:#fff4d6}
+.ringo-tag-staff{background:linear-gradient(180deg,#141018,#000);border-color:#a45cff;color:#e7d2ff}
+.ringo-vip-name.v2{color:#dcc2ff!important;-webkit-text-fill-color:#dcc2ff}.ringo-vip-name.v3{color:#e9d0ff!important;-webkit-text-fill-color:#e9d0ff}
+.ringo-vip-name.v4,.ringo-vip-name.v5{background:linear-gradient(90deg,#f3d48c,#d7b0ff,#f3d48c);-webkit-background-clip:text;background-clip:text;color:transparent!important;-webkit-text-fill-color:transparent;text-shadow:none!important}
+.ringo-vip-entry{flex:none;display:flex;align-items:center;gap:6px;margin:0 0 6px;padding:6px 10px;border-radius:999px;border:1px solid rgba(199,154,69,.65);background:linear-gradient(90deg,rgba(70,30,120,.85),rgba(20,10,35,.85));color:#f2e9ff;font:700 12px Arial,sans-serif;transition:opacity .5s,transform .5s}
+.ringo-vip-entry.is-out{opacity:0;transform:translateY(-6px)}
+/* Ajans sohbeti: yazar satırı, mesaj menüsü, sabit mesaj */
+.ringo-msg-author{display:flex!important;align-items:center;gap:0;min-width:0}
+.ringo-msg-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.ringo-msg-more{margin-left:auto;width:26px;height:20px;padding:0;border:0;border-radius:6px;background:rgba(255,255,255,.08);color:#e7d2ff;font:900 13px/1 Arial,sans-serif}
+.ringo-agency-pinned{flex:none;margin:0 0 6px}
+.ringo-agency-pin-card{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid rgba(199,154,69,.6);border-radius:11px;background:linear-gradient(145deg,rgba(60,30,100,.75),rgba(18,10,30,.8))}
+.ringo-agency-pin-card p{flex:1;min-width:0;margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#f2e9ff;font:12px Arial,sans-serif}
+.ringo-agency-pin-card b{color:#f3d48c}
+.ringo-agency-pin-card button{width:24px;height:24px;border:0;border-radius:7px;background:rgba(255,255,255,.1);color:#fff;font:700 15px/1 Arial,sans-serif}
+.ringo-agency-muted{margin:0 0 6px;padding:6px 9px;border-radius:10px;background:rgba(160,40,60,.35);border:1px solid rgba(255,120,140,.45);color:#ffd6dc;font:700 11px Arial,sans-serif}
+.ringo-agency-msg-menu{position:fixed;inset:0;z-index:5000;display:flex;align-items:flex-end;justify-content:center;background:rgba(5,2,10,.55)}
+.ringo-agency-msg-menu-card{display:grid;gap:7px;width:min(420px,100%);padding:16px 16px calc(16px + env(safe-area-inset-bottom));border-radius:20px 20px 0 0;border:1px solid rgba(186,118,255,.45);background:linear-gradient(180deg,#24143d,#120a20)}
+.ringo-agency-msg-menu-card>b{color:#fff;font:900 15px Arial,sans-serif}.ringo-agency-msg-menu-card>small{color:#c9b8e6;font:12px Arial,sans-serif;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ringo-agency-msg-menu-card button{min-height:44px;border:1px solid rgba(186,118,255,.4);border-radius:12px;background:rgba(42,20,72,.7);color:#fff;font:800 14px Arial,sans-serif}
+.ringo-agency-msg-menu-card button.is-danger{border-color:rgba(255,110,130,.55);color:#ffc2cc}
+.ringo-agency-msg-menu-card button.is-close{background:transparent;color:#c9b8e6}
+.ringo-agency-msg-menu-note{margin:0;color:#ffb3bf;font:12px Arial,sans-serif;min-height:14px}
+.ringo-agency-role-select{min-height:32px;max-width:150px;padding:4px 6px;border:1px solid rgba(186,118,255,.5);border-radius:9px;background:#1c1030;color:#f2e9ff;font:700 12px Arial,sans-serif}
+/* VIP mağazası */
+.ringo-profile-vip-chip{display:inline-flex;align-items:center;margin:4px 0 2px;padding:0;border:0;background:none;cursor:pointer}
+.ringo-profile-vip-chip .ringo-tags{margin-left:0}
+.ringo-profile-vip-chip .ringo-tag{height:18px;font-size:10px;padding:0 7px}
+.ringo-profile-vip-chip.is-empty{padding:3px 9px;border:1px solid rgba(199,154,69,.6);border-radius:999px;color:#f3d48c;font:800 11px Arial,sans-serif}
+.ringo-vip-current{display:flex;align-items:center;gap:8px;margin:10px 0 0;color:#e6dcf5;font:700 13px Arial,sans-serif}
+.ringo-vip-current .ringo-tag{height:20px;font-size:11px;padding:0 8px}
+.ringo-vip-grid{display:grid;gap:9px;margin-top:6px}
+.ringo-vip-card{display:grid;grid-template-columns:auto 1fr;align-items:center;gap:4px 10px;padding:12px;border:1px solid rgba(186,118,255,.3);border-radius:15px;background:rgba(20,10,36,.55)}
+.ringo-vip-card.is-current{border-color:rgba(214,170,82,.9)}
+.ringo-vip-card>.ringo-tags{grid-row:1/span 2;margin:0}.ringo-vip-card>.ringo-tags .ringo-tag{height:24px;font-size:12px;padding:0 9px}
+.ringo-vip-card>b{font:900 15px Arial,sans-serif;color:#fff}
+.ringo-vip-card>small{color:#c9b8e6;font:12px/1.35 Arial,sans-serif}
+.ringo-vip-card>button{grid-column:1/-1;min-height:40px;margin-top:6px;border:1px solid rgba(214,170,82,.8);border-radius:12px;background:linear-gradient(145deg,rgba(122,86,24,.88),rgba(58,36,8,.94));color:#ffe9b0;font:800 13px Arial,sans-serif}
+.ringo-vip-card>button:disabled{opacity:.5}
+</style>
+<style id="ringoPopularStyles">
+.ringo-popular-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ringo-popular-card{position:relative;isolation:isolate;display:flex;min-width:0;min-height:116px;flex-direction:column;align-items:flex-start;justify-content:flex-end;gap:5px;overflow:hidden;padding:13px;border:1px solid rgba(232,199,119,.4);border-radius:17px;background:linear-gradient(145deg,#28344a,#111a2b 72%);box-shadow:0 10px 22px #0008,inset 0 1px 0 #ffffff24;text-align:left}.ringo-popular-card:before{content:"";position:absolute;z-index:-1;inset:0;background:radial-gradient(circle at 82% 18%,#d9b65b35,transparent 38%),linear-gradient(135deg,transparent 35%,#ffffff08 55%,transparent 72%)}.ringo-popular-card b{font:700 14px/1.2 Arial,sans-serif;color:#fff1c9}.ringo-popular-card small{font:10px/1.3 Arial,sans-serif;color:#c2cada}.ringo-popular-icon{position:absolute;top:10px;left:13px;color:#f3d58a;font:25px Georgia,serif;text-shadow:0 0 12px #e0b95c99}.ringo-popular-arrow{position:absolute;right:12px;bottom:10px;color:#f1d58a;font:24px Arial,sans-serif}.ringo-popular-card:active{transform:translateY(1px);filter:brightness(1.15)}.popular-discover{background:linear-gradient(145deg,#42335d,#171b35 75%)}.popular-agencies{background:linear-gradient(145deg,#45344e,#1b1a32 75%)}.popular-live{background:linear-gradient(145deg,#51313a,#201827 75%)}.popular-moments{background:linear-gradient(145deg,#25485a,#111d31 75%)}
+@media(min-width:420px){.ringo-popular-card{min-height:128px;padding:15px}}
+</style>
+<link rel="stylesheet" href="/assets/agency-entry.css?v=8452d4bf6850">
+<link rel="stylesheet" href="/assets/agency-cards.css?v=fix-1">
+<link rel="stylesheet" href="/assets/agency-pilot.css?v=290c64b72d34">
+<style>
+/* Ajanslar kartı: tek parça referans görseli; mevcut agencyEntry düğmesi ve yönlendirmesi korunur. */
+#agencyEntry{display:block;width:100%;min-height:0;aspect-ratio:1159/538;padding:0;border:0;border-radius:16px;overflow:hidden;background:transparent;box-shadow:none;line-height:0;text-align:left;}\n#agencyEntry.is-positioned{visibility:visible;}
+#agencyEntry::before,#agencyEntry::after{content:none!important;display:none!important;}
+#agencyEntry .agency-entry-banner{display:block;width:100%;height:auto;aspect-ratio:1159/538;object-fit:cover;border:0;border-radius:16px;}
+#agencyEntry:active{transform:translateY(1px);filter:brightness(1.04);}
+</style>
+<style>#agencyEntry:not(.is-positioned){visibility:hidden}#agencyEntry.is-positioned{visibility:visible}</style>
+<style id="homeMusicStyles">
+/* LOUNGE ana kartı: Keşfet'in altında, 16:9 canlı kart (/lounge/kart/). Dosyalar yüklenene kadar yer tutucu görünür. */
+#homeMusicSection{margin-top:12px}
+#homeMusicSection .ringo-lounge-card{position:relative;width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:22px;background:radial-gradient(circle at 78% 20%,#7b2fd6cc,transparent 52%),linear-gradient(135deg,#150d25,#0b0812 60%,#2a1a05);box-shadow:0 16px 36px rgba(0,0,0,.62),0 0 26px rgba(216,180,93,.20),0 0 0 1px rgba(241,213,138,.32)}
+#homeMusicSection .lounge-enter-link{display:flex;align-items:center;justify-content:center;gap:7px;width:max-content;margin:8px 2px 0 auto;padding:7px 13px;border:1px solid rgba(241,213,138,.48);border-radius:999px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.06));box-shadow:0 4px 12px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.18);color:#f4d98e;text-decoration:none;font:600 11px/1 Outfit,Arial,sans-serif;letter-spacing:.04em;-webkit-tap-highlight-color:transparent}
+#homeMusicSection .lounge-enter-link span{font-size:16px;line-height:10px}
+#homeMusicSection .lounge-enter-link:active{transform:translateY(1px);background:rgba(255,255,255,.18)}
+#homeMusicSection iframe{position:absolute;inset:0;z-index:1;width:100%;height:100%;border:0;border-radius:inherit;opacity:0;transition:opacity .5s;pointer-events:none}
+#homeMusicSection iframe.ready{opacity:1}
+</style>
+<style id="homeDiscoverPkStyles">
+/* KEŞFET ana kartı: tek görsel + üstüne şeffaf butonlar. Görsel: /assets/discover/home-card-v2.webp (4:5, 1440x1800, yazısız). Düğme yazıları HTML, kullanıcının dilinde. */
+#homeDiscoverSection{margin-top:6px}
+#homeDiscoverSection .ringo-discover-home-card{border:0;border-radius:22px;box-shadow:0 16px 36px rgba(0,0,0,.62),0 0 26px rgba(216,180,93,.20),0 0 0 1px rgba(241,213,138,.32)}
+#homeDiscoverSection .ringo-discover-home-card:before{display:none}
+#homeDiscoverSection .discover-card-art{object-fit:cover;border-radius:inherit}
+#homeDiscoverSection .discover-card-open,#homeDiscoverSection .discover-hotspot{position:absolute;margin:0;padding:0;border:0;background:transparent;cursor:pointer;-webkit-tap-highlight-color:transparent}
+#homeDiscoverSection .discover-card-open{inset:0;z-index:3;border-radius:inherit}
+#homeDiscoverSection .discover-hotspot{z-index:4;border-radius:17%}
+#homeDiscoverSection .ringo-discover-home-card{container-type:inline-size}
+#homeDiscoverSection .discover-hotspot-label{position:absolute;left:5%;right:5%;top:70.7%;transform:translateY(-50%);display:block;text-align:center;color:#f1e9d2;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700;font-size:4.4cqw;line-height:1.08;letter-spacing:-.01em;white-space:nowrap;overflow-wrap:normal;word-break:normal;text-shadow:0 1px 2px rgba(0,0,0,.55);pointer-events:none}
+#homeDiscoverSection .discover-hotspot-label.is-add:before{content:"+ "}
+#homeDiscoverSection .discover-hotspot:active{background:rgba(255,220,130,.16);box-shadow:inset 0 0 0 2px rgba(255,220,130,.55)}
+#homeDiscoverSection .discover-hotspot:focus-visible,#homeDiscoverSection .discover-card-open:focus-visible{outline:2px solid #f1d58a;outline-offset:-3px}
+/* RİNGO LIVE PK: panelsiz, 3 kartlı kayan şerit; ortadaki kart öne çıkar. Oda görselleri: 3:4 (600x800) */
+#homeLivePkSection{position:relative;z-index:0;isolation:isolate;--pk-gap:10px;--pk-pad:14px;--pk-w:calc((min(100vw,520px) - 2*var(--pk-pad) - 2*var(--pk-gap))/3)}
+@media(min-width:420px){#homeLivePkSection{--pk-pad:18px}}
+#ringoPkStrip{position:relative;width:100%;margin:0;padding:0;border:0;background:none;box-shadow:none;overflow:visible}
+#ringoPkStrip .ringo-pk-track{position:relative;display:flex;width:100%;gap:var(--pk-gap);padding:20px 0 16px;overflow-x:auto;overflow-y:hidden;scroll-snap-type:x mandatory;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain;scrollbar-width:none}
+#ringoPkStrip .ringo-pk-track::-webkit-scrollbar{display:none}
+#ringoPkStrip .ringo-pk-track:before,#ringoPkStrip .ringo-pk-track:after{content:"";flex:0 0 calc((100% - var(--pk-w))/2 - var(--pk-gap))}
+#ringoPkStrip .ringo-pk-home-room{position:relative!important;flex:0 0 var(--pk-w)!important;width:var(--pk-w)!important;min-width:0!important;height:auto!important;aspect-ratio:3/4!important;margin:0!important;padding:0!important;display:block!important;overflow:hidden;border:1px solid rgba(241,213,138,.45)!important;border-radius:14px!important;scroll-snap-align:center;scroll-snap-stop:always;background-color:#171126;box-shadow:0 8px 18px rgba(0,0,0,.5);transform:scale(.9);opacity:.7;will-change:transform,opacity;-webkit-tap-highlight-color:transparent}
+#ringoPkStrip .ringo-pk-home-room.is-center{border-color:#f1d58a!important;box-shadow:0 12px 28px rgba(0,0,0,.65),0 0 20px rgba(241,213,138,.5)}
+#ringoPkStrip .ringo-pk-home-room small{position:absolute;left:0;right:0;bottom:0;display:block;padding:16px 4px 7px;background:linear-gradient(transparent,rgba(0,0,0,.82));color:#fff;font:800 11px/1 Arial,sans-serif;letter-spacing:.4px;text-align:center;text-shadow:0 1px 3px #000}
+#ringoPkStrip .ringo-pk-strip-all{display:block;width:100%;margin:0;padding:2px 0 0;border:0;background:none!important;box-shadow:none;color:#c9b27a;font:12px Arial,sans-serif;text-align:center}
+#ringoPkStrip .ringo-pk-strip-all b{display:none}
+#ringoPkStrip .ringo-pk-strip-all small{display:block;margin:0;color:inherit;font:inherit}
+#ringoPkStrip .ringo-agency-card-arrow{display:none!important}
+/* PK oda sayfası zemini: seçilen odanın görseli tam ekran arka plan olur. */
+.ringo-pk-chat-scene:before{content:""!important;position:fixed!important;inset:0!important;pointer-events:none!important}
+.ringo-layer.agency-mode:not(.agency-clean-mode){background:#05070d!important}
+.ringo-layer.agency-mode:not(.agency-clean-mode) .ringo-sheet-head{position:relative;z-index:3}
+</style>
+<style id="arcadeFullscreenStyles">
+/* Tam ekran oyunlar (Bowling, Mahjong, Air Hokey, Go vb.): oyuna girilince dış panel kabuğunu kaldır. */
+.ringo-layer.arcade-fullscreen{align-items:stretch!important;justify-content:stretch!important;padding:0!important;background:#030303!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+.ringo-layer.arcade-fullscreen .ringo-sheet{display:flex!important;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;min-height:100dvh!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#030303!important;box-shadow:none!important;overflow:hidden!important}
+.ringo-layer.arcade-fullscreen .ringo-sheet-head{display:none!important}
+.ringo-layer.arcade-fullscreen .ringo-sheet-body{display:block!important;flex:1 1 0!important;min-height:0!important;width:100%!important;height:100%!important;margin:0!important;padding:0!important;overflow:hidden!important}
+.ringo-layer.arcade-fullscreen .ringo-sheet-body iframe{display:block!important;width:100%!important;height:100%!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;border-radius:0!important;background:#030303!important}
+</style>
+<style id="ringoLanguagePickerStyles">
+.ringo-language-row{display:flex;justify-content:center;position:relative;z-index:30;margin:-2px 0 10px}
+.ringo-language{position:relative}
+.ringo-language-trigger{display:inline-flex;align-items:center;justify-content:center;gap:7px;min-width:82px;height:29px;padding:0 11px;border:1px solid rgba(224,194,120,.58);border-radius:18px;background:linear-gradient(135deg,rgba(255,255,255,.16),rgba(255,255,255,.045) 55%,rgba(216,180,93,.10));-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);box-shadow:0 4px 13px rgba(0,0,0,.30),inset 0 1px 0 rgba(255,255,255,.22),0 0 9px rgba(216,180,93,.10);color:#f1d58a;font:700 10px/1 Arial,sans-serif;letter-spacing:.35px}
+.ringo-language-trigger svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.ringo-language-menu{position:absolute;top:calc(100% + 8px);left:50%;transform:translateX(-50%);display:none;width:190px;max-height: min(52vh,300px);overflow:auto;padding:7px;border:1px solid rgba(224,194,120,.48);border-radius:15px;background:rgba(16,22,35,.94);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);box-shadow:0 12px 30px rgba(0,0,0,.48),inset 0 1px 0 rgba(255,255,255,.12)}
+.ringo-language.is-open .ringo-language-menu{display:grid;gap:3px}
+.ringo-language-option{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:34px;padding:0 10px;border:1px solid transparent;border-radius:9px;background:transparent;color:#f4f0e8;text-align:left;font:12px Arial,sans-serif}
+.ringo-language-option[aria-selected="true"]{border-color:rgba(224,194,120,.42);background:rgba(216,180,93,.13);color:#f1d58a}
+.ringo-language-option small{color:#aeb6c6;font:10px Arial,sans-serif}
+@media(max-width:360px){.ringo-language-row{margin-top:-4px;margin-bottom:8px}.ringo-language-trigger{height:27px;min-width:76px}}
+</style>
+<link rel="stylesheet" href="/assets/ringo-fullpage.css?v=7">
+<link rel="stylesheet" href="/assets/agency-manage.css?v=1">
+<link rel="stylesheet" href="/assets/ana-ekran-beyaz.css?v=9">
+</head>
+<body>
+<div id="ringoAcilis" aria-hidden="true"><div class="ra-img"></div><div class="ra-alt"><img class="ra-logo" src="/assets/ringo-logo.webp?v=1" alt="Ringo"><div class="ra-bar"><i></i></div></div></div>
+<script>(function(){var el=document.getElementById('ringoAcilis');if(!el)return;
+if(document.documentElement.classList.contains('ringo-acilis-yok')){el.remove();return;}
+try{sessionStorage.setItem('ringo_acilis','1');}catch(e){}
+var t0=Date.now(),bitti=false;function kapat(){if(bitti)return;bitti=true;el.classList.add('cik');setTimeout(function(){el.remove();},500);}
+function hazir(){setTimeout(kapat,Math.max(0,1400-(Date.now()-t0)));}
+if(document.readyState==='complete')hazir();else window.addEventListener('load',hazir);
+setTimeout(kapat,3200);})();</script>
+<main class="app">
+<header class="top">
+ <div class="tools header-shortcuts"><button class="header-shortcut" type="button" data-action="notifications" aria-label="Bildirimler" title="Bildirimler" data-i18n-attr="aria-label,title" data-i18n-aria-label="header.notifications" data-i18n-title="header.notifications"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg><span data-i18n="header.notifications">Bildirimler</span></button><button class="header-shortcut" type="button" data-action="messages" aria-label="Mesajlar" title="Mesajlar" data-i18n-attr="aria-label,title" data-i18n-aria-label="header.messages" data-i18n-title="header.messages"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a7.5 7.5 0 0 1-7.5 7.5H5l-2 2v-6a7.5 7.5 0 1 1 17-3.5Z"/><path d="M7.5 11.5h9"/></svg><span data-i18n="header.messages">Mesajlar</span></button></div>
+ <div class="brand"><img src="/assets/ringo-logo.webp?v=1" alt="Ringo" width="66" height="88"></div>
+ <div class="tools header-shortcuts"><button class="header-shortcut wallet-shortcut" data-action="wallet" type="button" aria-label="Cüzdan bakiyesi" title="Cüzdan bakiyesi" data-i18n-attr="aria-label,title" data-i18n-aria-label="header.wallet" data-i18n-title="header.wallet"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6.5A2.5 2.5 0 0 1 6.5 4H20v16H6.5A2.5 2.5 0 0 1 4 17.5z"/><path d="M4 7h16M15 13h5"/><path d="M16.5 13h.01"/></svg><span data-i18n="header.wallet">Cüzdan</span><small>R <span id="ringoBalance">0</span></small></button><button id="profileHeaderBtn" class="header-shortcut profile-shortcut" type="button" aria-label="Profil" aria-haspopup="dialog" data-i18n-attr="aria-label,title" data-i18n-aria-label="header.profile" data-i18n-title="header.profile" aria-expanded="false" aria-controls="profilePage" title="Profil"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 12a5 5 0 1 0 0-10 5 5 0 0 0 0 10zm0 2c-4.4 0-8 2.2-8 5v2h16v-2c0-2.8-3.6-5-8-5z"/></svg><span data-i18n="header.profile">Profil</span></button></div>
+</header>
+<div class="ringo-language-row">
+ <div class="ringo-language" id="ringoLanguagePicker">
+  <button class="ringo-language-trigger" id="ringoLanguageTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" aria-label="Dil seçimi" data-i18n-attr="aria-label" data-i18n-aria-label="language.select">
+   <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"></path></svg>
+   <span id="ringoLanguageCurrent">TR</span>
+   <span aria-hidden="true">⌄</span>
+  </button>
+  <div class="ringo-language-menu" id="ringoLanguageMenu" role="listbox" aria-label="Dil seçimi" data-i18n-attr="aria-label" data-i18n-aria-label="language.select">
+   <button class="ringo-language-option" type="button" role="option" data-lang="tr" aria-selected="true"><span>Türkçe</span><small>TR</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="en" aria-selected="false"><span>English</span><small>EN</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="de" aria-selected="false"><span>Deutsch</span><small>DE</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="fr" aria-selected="false"><span>Français</span><small>FR</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="es" aria-selected="false"><span>Español</span><small>ES</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="it" aria-selected="false"><span>Italiano</span><small>IT</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="pt" aria-selected="false"><span>Português</span><small>PT</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="ru" aria-selected="false"><span>Русский</span><small>RU</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="ar" aria-selected="false"><span>العربية</span><small>AR</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="zh-Hans" aria-selected="false"><span>中文</span><small>ZH</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="ja" aria-selected="false"><span>日本語</span><small>JA</small></button>
+   <button class="ringo-language-option" type="button" role="option" data-lang="ko" aria-selected="false"><span>한국어</span><small>KO</small></button>
+  </div>
+ </div>
+</div>
+<section class="section" id="homeDiscoverSection">
+ <div class="ringo-discover-home-card" id="ringoDiscoverCard" role="group" aria-label="RİNGO KEŞFET">
+  <span class="kart-boya" aria-hidden="true"></span><div class="kart-bos" aria-hidden="true"><i>✨</i><b></b><small></small></div>
+  <button type="button" class="discover-card-open" data-open-discover aria-label="Keşfet sayfasını aç" data-i18n-attr="aria-label" data-i18n-aria-label="discover.open"></button>
+  <button type="button" class="discover-hotspot" data-discover-action="story-add" aria-label="Hikâye Ekle" data-i18n-attr="aria-label" data-i18n-aria-label="discover.addStory" style="left:3.6%;top:64.5%;width:28.8%;height:26.1%"><span class="discover-hotspot-label is-add" data-i18n="discover.addStory">Hikâye Ekle</span></button>
+  <button type="button" class="discover-hotspot" data-discover-action="story-view" aria-label="Durumları Gör" data-i18n-attr="aria-label" data-i18n-aria-label="discover.viewStatuses" style="left:35.6%;top:64.5%;width:28.8%;height:26.1%"><span class="discover-hotspot-label" data-i18n="discover.viewStatuses">Durumları Gör</span></button>
+  <button type="button" class="discover-hotspot" data-discover-action="share" aria-label="Paylaş" data-i18n-attr="aria-label" data-i18n-aria-label="discover.share" style="left:67.6%;top:64.5%;width:28.8%;height:26.1%"><span class="discover-hotspot-label" data-i18n="discover.share">Paylaş</span></button>
+ </div>
+</section>
+<script>
+/* Keşfet kapağı: düğme yazısı uzun dillerde (ör. "Story hinzufügen") düğmeye sığana kadar küçülür, en fazla 2 satır. */
+(function(){
+  function fit(){
+    document.querySelectorAll('#homeDiscoverSection .discover-hotspot-label').forEach(function(el){
+      var card=el.closest('.ringo-discover-home-card');if(!card||!card.clientWidth)return;
+      var W=card.clientWidth,size=W*0.044,min=W*0.034;
+      // 1) Tek satır: sığana kadar küçült
+      el.style.whiteSpace='nowrap';el.style.fontSize=size+'px';
+      while(size>min&&el.scrollWidth>el.clientWidth+1){size-=0.25;el.style.fontSize=size+'px';}
+      if(el.scrollWidth<=el.clientWidth+1)return;
+      // 2) Sığmadıysa kelime aralarından 2 satır (kelime ortadan bölünmez)
+      size=W*0.04;el.style.whiteSpace='normal';el.style.fontSize=size+'px';
+      while(size>W*0.026&&(el.scrollWidth>el.clientWidth+1||el.offsetHeight>size*1.08*2+2)){size-=0.25;el.style.fontSize=size+'px';}
+    });
+  }
+  window.addEventListener('ringo:language-change',function(){requestAnimationFrame(fit);});
+  window.addEventListener('resize',fit);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fit);else fit();
+  setTimeout(fit,600);
+})();
+</script>
+<script src="/assets/home-tv.js?v=4" defer></script>
+<script src="/assets/ringo-kirp.js?v=1" defer></script>
+<script src="/assets/ana-ekran-beyaz.js?v=2" defer></script>
+<section class="section" id="homeMusicSection">
+ <div class="ringo-lounge-card" id="ringoLoungeCard">
+  <iframe id="ringoLoungeFrame" src="/lounge/?embed=1" title="Ringo Lounge ritim kartı" tabindex="-1" loading="eager" allow="autoplay" onload="this.classList.add('ready')"></iframe>
+ </div>
+ <a class="lounge-enter-link" href="/lounge/" aria-label="Ringo Müzik Odasına gir" data-i18n-attr="aria-label" data-i18n-aria-label="lounge.enterRoom" data-i18n="lounge.enterRoom">Odaya Gir <span aria-hidden="true">›</span></a>
+</section>
+<section class="section" id="homeLivePkSection">
+ <div class="section-head"><h2>RİNGO LIVE PK</h2></div>
+ <div class="ringo-pk-strip" id="ringoPkStrip" aria-label="RİNGO LIVE PK sohbet odaları">
+  <span class="ringo-pk-track" id="ringoPkTrack">
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="01" aria-label="PK Sohbet Odası 01" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8wMS5qcGcifQ.979073c684de49c903e40abf960e4862bdb0934ad0ac8672f7819e26b8360501');background-size:cover;background-position:center"><small>ODA 01</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="02" aria-label="PK Sohbet Odası 02" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8wMi5qcGcifQ.265503b90fd2ddb4dccb0b7ac78b678a89d7a6070d4bdb959b4d237445c4f912');background-size:cover;background-position:center"><small>ODA 02</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="03" aria-label="PK Sohbet Odası 03" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8wMy5qcGcifQ.5fd3e8ab139a5d7e5bd03bb2ff106c88072be2a07acab587bb6972bcdc745f96');background-size:cover;background-position:center"><small>ODA 03</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="04" aria-label="PK Sohbet Odası 04" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8wNC5qcGcifQ.b06897fe76454b6c20e0eb07e86b164a68d0bb3ba23c806917be715e07a4d7f1');background-size:cover;background-position:center"><small>ODA 04</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="05" aria-label="PK Sohbet Odası 05" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8wNS5qcGcifQ.94cc494d8aa23946a34c98cb9cc3f60317bf2a1b5f7ea2de550866caafae9860');background-size:cover;background-position:center"><small>ODA 05</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="06" aria-label="PK Sohbet Odası 06" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8wNi5qcGcifQ.f65450e103b9647407df5f81c02bb6676c0c7fe680b7bd187e6f86c86221eded');background-size:cover;background-position:center"><small>ODA 06</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="07" aria-label="PK Sohbet Odası 07" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8wNy5qcGcifQ.75f09297f968d2d3816414e8871ad4d5b495d9b4db1ad3deafc15f59963ceba4');background-size:cover;background-position:center"><small>ODA 07</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="08" aria-label="PK Sohbet Odası 08" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8wOC5qcGcifQ.683307a4863d18eed59fcf76f6dd9ee993082569de48ef584b68a8b0790bf013');background-size:cover;background-position:center"><small>ODA 08</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="09" aria-label="PK Sohbet Odası 09" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8wOS5qcGcifQ.276f40d4941d783d3c70a45f9656e274843eafdbd3cbb2c118ebdf2c04b99cf8');background-size:cover;background-position:center"><small>ODA 09</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="10" aria-label="PK Sohbet Odası 10" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8xMC5qcGcifQ.dce61f31549e53ed33a3bbe40a04f79e68f513bde52453c0b693f760875e2b44');background-size:cover;background-position:center"><small>ODA 10</small></button>
+   <button type="button" class="ringo-pk-home-room" data-open-pk-room="11" aria-label="PK Sohbet Odası 11" style="background-image:url('https://hatchable.com/s/eyJwIjoxMjAyMjgsImsiOiJyaW5nb1wvbGl2ZS1wa1wvcGtfYmFja2dyb3VuZF8xMS5qcGcifQ.048f5605a02328c2bfc272c4da56a7bbb2967ff5e33c2ef7e8bd791b79d81359');background-size:cover;background-position:center"><small>ODA 11</small></button>
+  </span>
+  <button type="button" class="ringo-pk-strip-all" data-open-live-pk><b>RİNGO LIVE PK</b><small data-i18n="home.pkStripHint">11 sohbet odası · Bir odaya dokun</small></button>
+  </div>
+</section>
+<section class="section" id="homeAgencyDirectorySection">
+ <div class="section-head"><h2 data-i18n="home.featuredAgencies">Öne Çıkan Ajanslar</h2></div>
+ <div class="ringo-home-featured-agencies" id="homeFeaturedAgencies"><p class="ringo-empty" data-i18n="rooms.loading">Öne çıkan ajanslar yükleniyor…</p></div>
+</section>
+<section class="section" id="homeFeaturedAgenciesSection">
+ <div class="section-head"><h2 data-i18n="home.agencies">Ajanslar</h2></div>
+ <button type="button" class="agency" id="agencyEntry" aria-haspopup="dialog" aria-controls="ringoAgencyDialog"><img class="agency-entry-banner" src="/assets/ajanslar-afis-enerji.svg?v=1" alt="Ajanslar — toplulukları keşfet, yeni yeteneklerle tanış" width="780" height="524"></button>
+</section>
+<section class="section" id="ringoPopularSection">
+ <div class="section-head"><h2 data-i18n="home.ringoPopular">Ringo Popüler</h2></div>
+ <div class="ringo-popular-grid" aria-label="Ringo Popüler">
+  <button type="button" class="ringo-popular-card popular-discover" data-view="discover"><span class="ringo-popular-icon" aria-hidden="true">✦</span><b data-i18n="discover.title">Keşfet</b><small data-i18n="home.viewAll">Tümünü gör</small><span class="ringo-popular-arrow" aria-hidden="true">›</span></button>
+  <button type="button" class="ringo-popular-card popular-agencies" data-view="agencies"><span class="ringo-popular-icon" aria-hidden="true">♛</span><b data-i18n="home.agencies">Ajanslar</b><small data-i18n="home.featuredAgencies">Öne Çıkan Ajanslar</small><span class="ringo-popular-arrow" aria-hidden="true">›</span></button>
+  <button type="button" class="ringo-popular-card popular-live" data-open-live-pk><span class="ringo-popular-icon" aria-hidden="true">●</span><b>RİNGO LIVE PK</b><span class="ringo-popular-arrow" aria-hidden="true">›</span></button>
+  <button type="button" class="ringo-popular-card popular-moments" data-view="moments"><span class="ringo-popular-icon" aria-hidden="true">◎</span><b data-i18n="discover.posts">Paylaşımlar</b><small data-i18n="home.viewAll">Tümünü gör</small><span class="ringo-popular-arrow" aria-hidden="true">›</span></button>
+ </div>
+</section>
+<!-- Keşfet giriş kartı: tasarım montajı tamamlanınca mevcut kart alanında yer alacak. -->
+<!-- Oyun Merkezi kartı kaldırıldı; oyunlara erişim alt menüdeki Oyunlar butonundan sürer. -->
+</main>
+<!-- Floating profile button removed; profile remains available from the header. -->
+<section id="profilePage" class="profile-page" hidden role="dialog" aria-modal="true" aria-hidden="true" aria-label="Profil sayfası" data-i18n-attr="aria-label" data-i18n-aria-label="header.profile">
+  <button id="profileClose" class="profile-close" type="button" aria-label="Geri" data-i18n-attr="aria-label" data-i18n-aria-label="common.back">←</button>
+  <div class="profile-card" id="profileCard"><p class="ringo-empty" data-i18n="profile.loading">Profil bilgilerin yükleniyor…</p></div>
+</section>
+<section id="statusPage" class="status-page" hidden aria-hidden="true" aria-label="Durum" data-i18n-attr="aria-label" data-i18n-aria-label="nav.status"></section>
+<nav class="bottom" aria-label="Ana gezinme" data-i18n-attr="aria-label" data-i18n-aria-label="common.navigation">
+ <button class="nav active" type="button" data-tab="home"><img src="/assets/menu-icon-1.webp?v=f594daa4df4f" alt=""><span data-i18n="nav.home">Ana Sayfa</span></button>
+ <button class="nav" type="button" id="statusNavBtn" aria-label="Durum"><img src="/assets/menu-icon-2.webp?v=9cd7471a8359" alt=""><span data-i18n="nav.status">Durum</span></button>
+ <button class="nav" type="button" data-tab="games"><img src="/assets/menu-icon-3.webp?v=276f22f6529f" alt=""><span data-i18n="nav.games">Oyunlar</span></button>
+ <button class="nav" type="button" data-tab="messages"><img src="/assets/menu-icon-4.webp?v=f357b123018e" alt=""><span data-i18n="nav.messages">Mesajlar</span></button>
+ <button class="nav" type="button" data-tab="admin" hidden aria-label="Yönetici ve Adminler"><img src="/assets/menu-icon-5.webp?v=f6081838bc1f" alt=""><span data-i18n="nav.admin">Yönetici ve Adminler</span></button>
+</nav>
+<script src="/__hatchable/events.js?v=152"></script>
+<script defer src="/assets/ringo-live-media.js?v=3"></script>
+<script src="/assets/ringo-duyuru.js?v=1" defer></script>
+<script src="/assets/ringo-etkinlikler.js?v=1" defer></script>
+<script src="/assets/main-app.js?v=rt-canli-24" defer></script>
+<script src="/assets/ringo-oyun-durum.js?v=1" defer></script>
+<script src="/assets/ringo-profile.js?v=18" defer></script>
+<script src="/assets/ringo-sikayet.js?v=1" defer></script>
+<script src="/assets/ringo-vitrin.js?v=3" defer></script>
+<script src="/assets/agency-entry.js?v=site-i18n-v4" defer></script>
+<script src="/assets/status-stories.js?v=feed-9" defer></script>
+<script>
+(function(){
+  var button=document.getElementById("statusNavBtn");
+  var page=document.getElementById("statusPage");
+  if(!button||!page||button.dataset.statusReady==="1")return;
+  button.dataset.statusReady="1";
+  function closeStatus(){page.hidden=true;page.setAttribute("aria-hidden","true");button.setAttribute("aria-expanded","false");}
+  function openStatus(){page.hidden=false;page.setAttribute("aria-hidden","false");button.setAttribute("aria-expanded","true");}
+  button.addEventListener("click",function(event){event.preventDefault();event.stopPropagation();openStatus();});
+  if(new URLSearchParams(location.search).get("openStatus")==="1"){history.replaceState({}, "", location.pathname);openStatus();}
+  page.addEventListener("click",function(event){if(event.target===page)closeStatus();});
+  document.addEventListener("keydown",function(event){if(event.key==="Escape"&&!page.hidden)closeStatus();});
+})();
+</script>
+<script>
+/* RİNGO LIVE PK şeridi: ortadaki kart büyür ve parlar, yan kartlar küçülüp solar. */
+(function(){
+  var track=document.getElementById("ringoPkTrack");
+  if(!track)return;
+  var cards=[].slice.call(track.querySelectorAll(".ringo-pk-home-room"));
+  if(!cards.length)return;
+  var START_INDEX=1,raf=0,touched=false;
+  function update(){
+    raf=0;
+    var tr=track.getBoundingClientRect(),mid=tr.left+tr.width/2,pitch=cards[0].offsetWidth+10,best=0,bestD=1e9;
+    cards.forEach(function(c,i){
+      var r=c.getBoundingClientRect(),d=Math.abs(r.left+r.width/2-mid)/pitch;
+      if(d<bestD){bestD=d;best=i}
+      var k=Math.min(d,1);
+      c.style.transform="scale("+(1.14-.26*k).toFixed(3)+")";
+      c.style.opacity=(1-.38*k-(d>1?Math.min(d-1,1)*.3:0)).toFixed(2);
+      c.style.zIndex=String(Math.round((2-Math.min(d,2))*10));
+    });
+    cards.forEach(function(c,i){c.classList.toggle("is-center",i===best)});
+  }
+  function start(){
+    var c=cards[Math.min(START_INDEX,cards.length-1)];
+    track.scrollLeft=c.offsetLeft-(track.clientWidth-c.offsetWidth)/2;
+    update();
+  }
+  track.addEventListener("scroll",function(){if(!raf)raf=requestAnimationFrame(update)},{passive:true});
+  track.addEventListener("touchstart",function(){touched=true},{passive:true});
+  window.addEventListener("resize",function(){if(!touched)start();else update()});
+  window.addEventListener("load",function(){if(!touched)start()});
+  start();
+})();
+/* Keşfet kartı: görselin içindeki üç butonun yönlendirmeleri. */
+(function(){
+  var card=document.getElementById("ringoDiscoverCard");
+  if(!card)return;
+  function openStatus(){
+    var b=document.getElementById("statusNavBtn");
+    if(b)b.click();
+  }
+  card.addEventListener("click",function(e){
+    var a=e.target.closest("[data-discover-action]");
+    if(!a)return;
+    e.preventDefault();
+    var act=a.getAttribute("data-discover-action");
+    if(act==="story-add"||act==="story-view")openStatus();
+    else if(act==="share")location.href="/ringo-discover.html?compose=1";
+  });
+})();
+</script>
+<script>
+window.RINGO_MASCOT = { base: '/lounge/mascot/img/', page: 'home', size: 74, platforms: '.section' };
+</script>
+<script src="/lounge/mascot/poses/normal.js"></script>
+<script src="/lounge/mascot/poses/happy.js"></script>
+<script src="/lounge/mascot/poses/surprised.js"></script>
+<script src="/lounge/mascot/poses/sleeping.js"></script>
+<script src="/lounge/mascot/poses/waving.js"></script>
+<script src="/lounge/mascot/mascot.js?v=i18n-1"></script>
+<script src="/assets/ringo-i18n.js?v=site-i18n-v21"></script>
+<script src="/assets/daily-wheel-strip.js?v=dw3" defer></script>
+<script id="ringoLanguagePickerScript">
+(function(){
+  var root=document.getElementById("ringoLanguagePicker");
+  var trigger=document.getElementById("ringoLanguageTrigger");
+  var current=document.getElementById("ringoLanguageCurrent");
+  var menu=document.getElementById("ringoLanguageMenu");
+  var i18n=window.RINGO_I18N;
+  if(!root||!trigger||!current||!menu||!i18n||root.dataset.ready==="1")return;
+  root.dataset.ready="1";
+  var labels={tr:"Türkçe",en:"English",de:"Deutsch",fr:"Français",es:"Español",it:"Italiano",pt:"Português",ru:"Русский",ar:"العربية","zh-Hans":"中文",ja:"日本語",ko:"한국어"};
+  var codes={tr:"TR",en:"EN",de:"DE",fr:"FR",es:"ES",it:"IT",pt:"PT",ru:"RU",ar:"AR","zh-Hans":"ZH",ja:"JA",ko:"KO"};
+  var lang=i18n.getLanguage();
+  function paint(){
+    lang=i18n.getLanguage();
+    current.textContent=codes[lang]||"TR";
+    trigger.setAttribute("aria-label",i18n.t("language.select")+": "+(labels[lang]||labels.tr));
+    menu.querySelectorAll("[data-lang]").forEach(function(item){
+      item.setAttribute("aria-selected",item.getAttribute("data-lang")===lang?"true":"false");
+    });
+  }
+  function close(){root.classList.remove("is-open");trigger.setAttribute("aria-expanded","false");}
+  trigger.addEventListener("click",function(){
+    var open=!root.classList.contains("is-open");
+    root.classList.toggle("is-open",open);
+    trigger.setAttribute("aria-expanded",open?"true":"false");
+  });
+  menu.addEventListener("click",function(event){
+    var option=event.target.closest("[data-lang]");
+    if(!option)return;
+    var next=option.getAttribute("data-lang");
+    if(!i18n.setLanguage(next,{userSelected:true}))return;
+    paint();close();
+  });
+  document.addEventListener("click",function(event){if(!root.contains(event.target))close();});
+  document.addEventListener("keydown",function(event){if(event.key==="Escape")close();});
+  window.addEventListener("ringo:language-change",paint);
+  paint();
+})();
+</script>
+</body>
+</html>
