@@ -75,7 +75,7 @@
         .then(function (r) { return r.json().catch(function () { return { ok: false, error: r.status === 429 ? 'Çok fazla deneme. Lütfen biraz sonra tekrar deneyin.' : 'Gönderilemedi.' }; }); })
         .then(function (d) {
           if (d && d.ok) { var bk = f.konu.value === 'bekleme'; f.reset(); if (bk) f.konu.value = 'bekleme'; kip(); sonuc.className = 'sonuc ok';
-            sonuc.textContent = bk ? 'Kaydınız alındı! Ringo açıldığında ilk siz haberdar olacaksınız.' : 'Teşekkürler! Mesajınız bize ulaştı, en kısa sürede dönüş yapacağız.'; }
+            sonuc.textContent = bk ? 'Kaydınız alındı! Ringo açıldığında ilk siz haberdar olacaksınız.' + (d.karsilama ? ' E-postanıza bir karşılama mesajı gönderdik.' : '') : 'Teşekkürler! Mesajınız bize ulaştı, en kısa sürede dönüş yapacağız.'; }
           else { sonuc.className = 'sonuc hata'; sonuc.textContent = (d && d.error) || 'Gönderilemedi. Lütfen tekrar deneyin.'; }
         })
         .catch(function () { sonuc.className = 'sonuc hata'; sonuc.textContent = 'Bağlantı hatası. Lütfen tekrar deneyin.'; })
