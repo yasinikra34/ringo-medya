@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>İletişim — Ringo</title>
+<meta name="description" content="İş birliği, yatırım, basın ve genel sorularınız için Ringo ekibine yazın.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/img/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=1">
+</head>
+<body>
+
+<section style="padding-top:56px">
+  <div class="kap ikili" style="align-items:start">
+    <div>
+      <span class="etiket">İletişim</span>
+      <h1 style="margin:16px 0;font-size:clamp(36px,7vw,60px)">Bize <span class="gok-yazi">yazın</span></h1>
+      <p class="alt">Ajans kurmak, marka iş birliği yapmak, Ringo'ya yatırım yapmak ya da basın için bilgi almak istiyorsanız formu doldurun. Mesajınız doğrudan Ringo ekibine ulaşır.</p>
+      <ul class="liste" style="margin-top:28px">
+        <li><span><b>İş birliği:</b> ajanslar, yayıncılar, markalar ve etkinlikler.</span></li>
+        <li><span><b>Yatırım:</b> platform, büyüme planı ve teknik inceleme.</span></li>
+        <li><span><b>Basın:</b> logo ve görseller için <a href="basin.html" style="color:var(--mor);font-weight:800">Basın Kiti</a>.</span></li>
+        <li><span><b>Kullanıcı desteği:</b> hesabınızla ilgili sorular.</span></li>
+      </ul>
+    </div>
+    <form class="form" id="iletisimFormu" novalidate>
+      <label>Konu
+        <select name="konu">
+          <option value="genel">Genel bilgi</option>
+          <option value="is">İş birliği</option>
+          <option value="yatirim">Yatırım</option>
+          <option value="basin">Basın</option>
+          <option value="destek">Kullanıcı desteği</option>
+        </select>
+      </label>
+      <div class="iki">
+        <label>Adınız<input name="ad" autocomplete="name" required maxlength="80"></label>
+        <label>E-posta<input name="eposta" type="email" autocomplete="email" required maxlength="160"></label>
+      </div>
+      <label>Kurum (isteğe bağlı)<input name="kurum" autocomplete="organization" maxlength="120"></label>
+      <label>Mesajınız<textarea name="mesaj" required maxlength="3000"></textarea></label>
+      <div class="tuzak" aria-hidden="true"><label>Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label></div>
+      <button class="dugme ana" type="submit">Gönder</button>
+      <p class="sonuc" role="status"></p>
+      <p style="color:var(--muted);font-size:13px">Gönderdiğiniz bilgiler yalnız size dönüş yapmak için kullanılır. <a href="https://ringolounge.com/yasal/gizlilik.html" style="text-decoration:underline">Gizlilik Politikası</a></p>
+    </form>
+  </div>
+</section>
+
+<script src="assets/site.js?v=1"></script>
+</body>
+</html>

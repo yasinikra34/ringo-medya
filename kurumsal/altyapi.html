@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Altyapı ve Güvenlik — Ringo</title>
+<meta name="description" content="Ringo'nun teknik mimarisi: küresel kenar ağında gerçek zamanlı motor, sunucu tarafı oyun doğrulama, 7/24 izleme ve katmanlı güvenlik.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/img/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=1">
+</head>
+<body>
+
+<section class="kahraman" style="padding-bottom:40px">
+  <div class="kap" style="grid-template-columns:1fr">
+    <div>
+      <span class="etiket">Altyapı ve Güvenlik</span>
+      <h1 style="margin-top:16px;max-width:900px">Eğlencenin arkasında <span class="gok-yazi">mühendislik</span> var.</h1>
+      <p class="alt" style="margin-top:22px">Ringo, kalabalığın aynı anda konuştuğu, oynadığı ve hediye gönderdiği anlar için tasarlandı. Bu sayfa, platformun nasıl çalıştığını ve nasıl korunduğunu anlatır.</p>
+      <div class="serit"><a class="rozet" href="durum.html" data-sistem><i class="nabiz"></i><span data-sistem-yazi>Sistem kontrol ediliyor…</span></a>
+        <span class="rozet"><b data-sayi="sistem.gercek_zamanli.ms">–</b> ms gerçek zamanlı sunucu</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="yumusak" style="padding-top:64px">
+  <div class="kap">
+    <div class="bolum-bas belir"><span class="etiket">Mimari</span><h2>Bir isteğin yolculuğu</h2>
+      <p class="alt">Her katman tek bir işi yapar ve birbirinden bağımsız ölçeklenir. Bir parça yavaşlarsa diğerleri çalışmaya devam eder.</p></div>
+    <div class="sema belir">
+      <svg viewBox="0 0 880 400" role="img" aria-label="Ringo mimari şeması">
+        <defs>
+          <linearGradient id="g1" x1="0" x2="1"><stop offset="0" stop-color="#ff2d95"/><stop offset=".5" stop-color="#8a3ffc"/><stop offset="1" stop-color="#2f6bff"/></linearGradient>
+          <marker id="ok" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#8a3ffc"/></marker>
+        </defs>
+        <style>.k{fill:#fff;stroke:#ece8f6;stroke-width:2}.b{font:800 15px Manrope,sans-serif;fill:#16122b}.s{font:600 12px Manrope,sans-serif;fill:#5f5a76}.c{stroke:#8a3ffc;stroke-width:2;fill:none;marker-end:url(#ok)}.d{stroke:#ff2d95;stroke-width:2;fill:none;stroke-dasharray:6 5}</style>
+        <rect class="k" x="20" y="160" width="150" height="80" rx="16"/><text class="b" x="95" y="195" text-anchor="middle">Kullanıcılar</text><text class="s" x="95" y="216" text-anchor="middle">Web · mobil</text>
+        <rect x="230" y="40" width="240" height="320" rx="22" fill="url(#g1)" opacity=".08"/><text class="s" x="350" y="64" text-anchor="middle" style="font-weight:800;fill:#8a3ffc">KÜRESEL KENAR AĞI</text>
+        <rect class="k" x="250" y="80" width="200" height="74" rx="16"/><text class="b" x="350" y="112" text-anchor="middle">Gerçek Zamanlı Motor</text><text class="s" x="350" y="133" text-anchor="middle">Masalar · odalar · WebSocket</text>
+        <rect class="k" x="250" y="172" width="200" height="74" rx="16"/><text class="b" x="350" y="204" text-anchor="middle">Ses ve Görüntü</text><text class="s" x="350" y="225" text-anchor="middle">WebRTC · TURN aktarımı</text>
+        <rect class="k" x="250" y="264" width="200" height="74" rx="16"/><text class="b" x="350" y="296" text-anchor="middle">Medya Deposu</text><text class="s" x="350" y="317" text-anchor="middle">Müzik · görsel · hediye</text>
+        <rect class="k" x="540" y="110" width="160" height="80" rx="16"/><text class="b" x="620" y="144" text-anchor="middle">Uygulama API</text><text class="s" x="620" y="165" text-anchor="middle">Yetki · iş kuralları</text>
+        <rect class="k" x="540" y="230" width="160" height="80" rx="16"/><text class="b" x="620" y="264" text-anchor="middle">Veritabanı</text><text class="s" x="620" y="285" text-anchor="middle">PostgreSQL</text>
+        <rect class="k" x="740" y="160" width="120" height="80" rx="16"/><text class="b" x="800" y="194" text-anchor="middle">Bekçi</text><text class="s" x="800" y="215" text-anchor="middle">7/24 izleme</text>
+        <path class="c" d="M170 190 C205 190 215 117 248 117"/><path class="c" d="M170 200 L248 209"/><path class="c" d="M170 210 C205 210 215 301 248 301"/>
+        <path class="c" d="M170 180 C200 40 500 40 540 140"/>
+        <path class="d" d="M450 117 L538 140"/><text class="s" x="470" y="108" style="fill:#ff2d95">imzalı</text>
+        <path class="c" d="M620 190 L620 228"/>
+        <path class="d" d="M700 150 L738 185"/><path class="d" d="M700 270 L738 215"/>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="kap">
+    <div class="bolum-bas belir"><span class="etiket">Katmanlar</span><h2>Her parça kendi işinde uzman</h2></div>
+    <div class="izgara">
+      <article class="kart k2 belir"><div class="ikon"><svg viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9z"/></svg></div><h3>Gerçek Zamanlı Motor</h3>
+        <p>Her oyun masası ve canlı oda, küresel kenar ağında kendi küçük sunucusunda yaşar. Hamleler ve mesajlar milisaniyeler içinde herkese ulaşır; oyuncu koparsa masa onu bekler, döndüğünde kaldığı yerden devam eder.</p></article>
+      <article class="kart k3 belir"><div class="ikon"><svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="3"/><path d="M7 9h10M7 13h6"/></svg></div><h3>Uygulama API</h3>
+        <p>Sunucusuz fonksiyonlarla çalışır; yük arttıkça kendiliğinden çoğalır. Her uç kendi yetki kontrolünü yapar, istemci veritabanına asla doğrudan erişemez.</p></article>
+      <article class="kart k4 belir"><div class="ikon"><svg viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg></div><h3>Veritabanı</h3>
+        <p>Yönetilen PostgreSQL; puan ve hediye hareketleri ayrı defter kayıtlarıyla izlenir, her işlem tekrar gönderime karşı korunur.</p></article>
+      <article class="kart k1 belir"><div class="ikon"><svg viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1v-6h3zM3 19a2 2 0 0 0 2 2h1v-6H3z"/></svg></div><h3>Ses, Görüntü ve Medya</h3>
+        <p>Sesli odalar ve PK yayınları WebRTC ile doğrudan akar; zor ağlar için aktarım sunucusu devreye girer. Müzik ve görseller kenar ağındaki medya deposundan sunulur.</p></article>
+      <article class="kart k5 belir"><div class="ikon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></div><h3>Bekçi: 7/24 İzleme</h3>
+        <p>Site her 5 dakikada dışarıdan denetlenir, her 10 dakikada içeriden bakım raporu çıkar: veritabanı gecikmesi, takılı masalar, hatalar. Sorun olursa ekip anında e-posta alır.</p></article>
+      <article class="kart k6 belir"><div class="ikon"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 15 4-4 3 3 6-7"/></svg></div><h3>Ölçeklenme</h3>
+        <p>Masalar ve odalar birbirinden bağımsız çalıştığı için kullanıcı sayısı arttıkça sistem yatay büyür; tek bir yoğun oda diğerlerini yavaşlatmaz.</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="yumusak">
+  <div class="kap ikili">
+    <div class="belir"><span class="etiket">Güvenlik ve Gizlilik</span><h2 style="margin:14px 0">Katman katman <span class="gok-yazi">koruma</span></h2>
+      <p class="alt">Güvenlik sonradan eklenmedi; her uç, her tablo ve her sunucu konuşması baştan buna göre kuruldu.</p></div>
+    <ul class="liste belir">
+      <li><span><b>Sunucu tarafı yetki:</b> tüm izin kontrolleri API'de yapılır; tarayıcıya güvenilmez.</span></li>
+      <li><span><b>İmzalı sunucu iletişimi:</b> uygulama ile gerçek zamanlı motor arasındaki her istek gizli anahtarla imzalanır; sahte istek reddedilir.</span></li>
+      <li><span><b>İstek sınırlama:</b> kişi başı ve uç başı sınırlar kötüye kullanımı ve spam'i keser.</span></li>
+      <li><span><b>Moderasyon:</b> otomatik küfür filtresi, şikâyet sistemi, oda yetkilileri ve yaptırım kayıtları.</span></li>
+      <li><span><b>Gizlilik:</b> açık rıza kaydı, istendiğinde tam hesap silme ve çocuk güvenliği politikası.</span></li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="kap ikili">
+    <ul class="liste belir">
+      <li><span><b>Gerçek para yok, bahis yok:</b> oyunlar yalnız Ringo Puanı ile oynanır.</span></li>
+      <li><span><b>Hileye kapalı:</b> masa oyunlarında dağıtım ve hamleler sunucuda yürütülür ve doğrulanır.</span></li>
+      <li><span><b>Adil masa:</b> masalar lobiden açılır; oyuncu bağlı değilken masa kendi kendine oynamaz, bekler.</span></li>
+      <li><span><b>Şeffaf skor:</b> arcade skorları sunucuda yeniden oynatılarak doğrulanır.</span></li>
+    </ul>
+    <div class="belir"><span class="etiket">Adil Oyun</span><h2 style="margin:14px 0">Herkes için <span class="gok-yazi">eşit masa</span></h2>
+      <p class="alt">Ringo'da kazanmak beceri ve eğlence işidir. Puan sistemi bahsi ve şans oyunlarını kapı dışında bırakacak şekilde tasarlandı.</p></div>
+  </div>
+</section>
+
+<section>
+  <div class="kap"><div class="cagri belir"><h2>Sistemi şu an canlı izleyin</h2><p>Sunucuların anlık durumu ve yanıt süreleri herkese açık.</p>
+    <a class="dugme ikinci" href="durum.html">Sistem Durumu</a></div></div>
+</section>
+
+<script src="assets/site.js?v=1"></script>
+</body>
+</html>

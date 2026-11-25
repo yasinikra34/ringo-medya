@@ -1,0 +1,424 @@
+# İZİN KURALI (2026-11-16): Hatchable'da sunucu sorguları isteği yapan kullanıcının yetkisiyle çalışır.
+# "own" ve "member" sunucunun başka kullanıcı adına okuma/yazmasını engeller (sessizce boş sonuç ya da RLS hatası).
+# 2026-11-17: SECURITY DEFINER fonksiyonlar da bu kuralı AŞAMIYOR (canlıda ringo_live_action → ringo_agency_live_requests RLS hatası);
+# migration'lar da "member" tablolara yazamıyor. Kullanıcı isteğiyle yazılan her tablo public olmalı.
+# İstemcinin doğrudan veritabanı erişimi yok; tüm kontrol API uçlarında. Sunucunun başkası adına eriştiği tablolar public.
+[auth]
+enabled = true
+providers = ["email", "google"]  # Google: sahip Hatchable Setup kartında alan adı + kendi Google OAuth istemcisini girince açılır
+
+[db.tables.ringo_agency_members]
+read = "public"
+write = "own"
+
+[db.tables.ringo_agency_room_members]
+read = "public"
+write = "own"
+
+[db.tables.ringo_agency_room_messages]
+read = "public"
+write = "own"
+
+[db.tables.ringo_rooms]
+read = "public"
+write = "public"
+
+[db.tables.ringo_room_members]
+read = "public"
+write = "own"
+
+[db.tables.ringo_room_messages]
+read = "public"
+write = "own"
+
+[db.tables.ringo_notifications]
+read = "public"
+write = "public"
+
+[db.tables.ringo_profiles]
+read = "public"
+write = "own"
+
+# İlk giriş formu: doğum tarihi, cinsiyet, ülke, onay. Yalnız kişi kendi satırını görür; kayıt /api/onboarding üzerinden.
+# 18 yaş kuralı veritabanı tetikleyicisinde de zorunlu (ringo_onboarding_age_guard).
+[db.tables.ringo_user_onboarding]
+read = "own"
+write = "own"
+
+[db.tables.ringo_consent_log]
+read = "own"
+write = "own"
+
+# Direct-thread membership is stored on ringo_direct_threads.
+
+# Özel mesajlara istemciden doğrudan erişim yok; tüm erişim üyelik ve engel kontrolü yapan /api/messages uçlarından.
+# Sunucu sorguları isteği yapan kullanıcının yetkisiyle çalıştığı için "own/member" mesajlaşmayı bozuyordu:
+# alıcı karşı tarafın mesajını okuyamıyor, "okundu" işaretlenemiyor, "member" ise gönderimi tamamen reddediyordu.
+[db.tables.ringo_direct_messages]
+read = "public"
+write = "public"
+
+[db.tables.ringo_wallets]
+read = "public"
+write = "public"
+
+[db.tables.ringo_wallet_ledger]
+read = "public"
+write = "public"
+
+[db.tables.ringo_profile_preferences]
+read = "public"
+write = "public"
+
+[db.tables.ringo_account_requests]
+read = "public"
+write = "public"
+
+[db.tables.ringo_agency_call_participants]
+read = "own"
+write = "own"
+
+[db.tables.ringo_agency_message_limits]
+read = "own"
+write = "own"
+
+# ringo_game_catalog removed; no table policy needed.
+
+[db.tables.ringo_moments]
+read = "public"
+write = "public"
+
+[db.tables.ringo_voice_sessions]
+read = "public"
+write = "public"
+
+[db.tables.ringo_voice_participants]
+read = "public"
+write = "own"
+
+# Okey 101 seats are shared across the four players at a table; API routes
+# enforce authenticated membership, turn ownership, and bot-only server moves.
+[db.tables.ringo_okey101_players]
+read = "public"
+write = "public"
+# Ringo 51 rows are shared by table participants; API routes enforce membership and turn ownership.
+[db.tables.ringo51_players]
+read = "public"
+write = "public"
+
+[db.tables.ringo51_chat]
+read = "public"
+write = "public"
+
+# Dart chat access is authenticated and validated by /api/dart-chat.
+[db.tables.ringo_dart_chat_messages]
+read = "public"
+write = "public"
+
+# Dart match rows are shared by participants; /api/dart/match enforces seat and turn ownership.
+[db.tables.ringo_dart_sessions]
+read = "public"
+write = "public"
+
+[db.tables.ringo_dart_players]
+read = "public"
+write = "public"
+
+# Pişti masaları çok oyunculu olarak paylaşılır; API uçları masa üyeliğini ve hamle sırasını doğrular.
+[db.tables.ringo_pisti_players]
+read = "public"
+write = "public"
+
+# Bilardo masa üyeleri paylaşılır; Bilardo API uçları kullanıcı üyeliğini ve hamle sırasını doğrular.
+[db.tables.ringo_bilardo_players]
+read = "public"
+write = "public"
+
+# Domino masalari ve hamleleri katilimcilar arasinda paylasilir; API rotalari
+# kimlik, masa uyeligi, koltuk ve hamle sirasini dogrular.
+[db.tables.ringo_domino_players]
+read = "public"
+write = "public"
+
+[db.tables.ringo_domino_chat]
+read = "public"
+write = "public"
+
+[db.tables.ringo_domino_stats]
+read = "public"
+write = "public"
+
+# Ringo rank data is private to each end user; privileged assignments are API-governed.
+[db.tables.ringo_user_ranks]
+read = "public"
+write = "public"
+
+[db.tables.ringo_staff_roles]
+read = "public"
+write = "public"
+
+[db.tables.ringo_rank_admins]
+read = "public"
+write = "public"
+
+[db.tables.ringo_rank_catalog]
+read = "public"
+write = "member"
+
+# Koz Maça verileri masadaki katılımcılar arasında paylaşılır.
+# Üyelik, koltuk, hamle ve mesaj doğrulaması yalnızca access='user' API rotalarında yapılır.
+[db.tables.koz_maca_players]
+read = "public"
+write = "public"
+
+[db.tables.koz_maca_chat]
+read = "public"
+write = "public"
+
+[db.tables.koz_maca_voice_participants]
+read = "public"
+write = "public"
+
+# Tavla sessions and player seats are shared; authenticated API routes enforce membership and turn ownership.
+[db.tables.ringo_tavla_sessions]
+read = "public"
+write = "public"
+
+[db.tables.ringo_tavla_players]
+read = "public"
+write = "public"
+# Ludo player row access is declared once in the canonical Ludo table section.
+# TURN credential issuance records are private to each end user.
+[db.tables.ringo_rtc_turn_credential_issues]
+read = "own"
+write = "own"
+
+# Cloudflare TURN credentials are optional until the owner completes Setup.
+[[secret]]
+name = "CLOUDFLARE_TURN_KEY_ID"
+required = false
+description = "32-character UID returned when the Cloudflare Realtime TURN key is created."
+
+[[secret]]
+name = "CLOUDFLARE_TURN_KEY"
+required = false
+description = "Legacy setting; the current TURN endpoint reads CLOUDFLARE_TURN_API_TOKEN instead. Do not populate this field."
+
+[[secret]]
+name = "CLOUDFLARE_TURN_API_TOKEN"
+required = false
+description = "64-character Bearer secret (the result.key value returned when creating the Cloudflare TURN key), NOT the account API token. Used only server-side to generate short-lived TURN ICE credentials."
+
+# Ludo tables are shared through authenticated API routes with membership validation.
+[db.tables.ringo_ludo_sessions]
+read = "public"
+write = "public"
+[db.tables.ringo_ludo_players]
+read = "public"
+write = "public"
+[db.tables.ringo_ludo_commands]
+read = "public"
+write = "public"
+[db.tables.ringo_ludo_chat]
+read = "public"
+write = "public"
+
+# Cloudflare R2 S3-compatible storage credentials; values are configured in Setup and read server-side only.
+[[secret]]
+name = "R2_ACCOUNT_ID"
+required = false
+description = "Cloudflare account ID used by the Ringo R2 storage integration."
+
+[[secret]]
+name = "R2_ACCESS_KEY_ID"
+required = false
+description = "Cloudflare R2 S3 API access key ID. Configure this in Setup; never expose it in client code."
+
+[[secret]]
+name = "R2_SECRET_ACCESS_KEY"
+required = false
+description = "Cloudflare R2 S3 API secret access key. Configure this in Setup; keep it server-side only."
+
+[db.tables.ringo_media_assets]
+read = "public"
+write = "public"
+
+# Renko room records are shared only through authenticated API routes;
+# those routes enforce room membership, owner actions, and turn/state checks.
+[db.tables.renko_players]
+read = "public"
+write = "public"
+
+# Bowling oda ve oyuncu satırlarına yalnızca doğrulanmış API rotaları üzerinden erişilir.
+[db.tables.ringo_bowling_players]
+read = "public"
+write = "public"
+
+# Air Hokey oyuncu koltukları yalnızca üyelik ve oda doğrulaması yapan API rotalarıyla yönetilir.
+[db.tables.ringo_airhockey_players]
+read = "public"
+write = "public"
+
+# Batak oyuncu ve sohbet satırları yalnızca üyelik/hamle kontrolü yapan access=user API rotalarıyla yönetilir.
+[db.tables.ringo_batak_players]
+read = "public"
+write = "public"
+
+[db.tables.ringo_batak_chat]
+read = "public"
+write = "public"
+
+# Agency points and role audits are readable only by the affected member.
+# Owner writes are routed through SECURITY DEFINER routines that verify agency ownership.
+[db.tables.ringo_agency_points_ledger]
+read = "own"
+write = "member"
+
+[db.tables.ringo_agency_role_audit]
+owner_column = "target_user_id"
+read = "own"
+write = "member"
+
+[db.tables.ringo_agency_member_removals]
+owner_column = "target_user_id"
+read = "own"
+write = "member"
+
+# Rank XP history is private; inserts are accepted only with a matching server audit.
+[db.tables.ringo_rank_xp_ledger]
+read = "public"
+write = "public"
+
+# Ringo Points are private per user; award mutations happen only in server API code.
+[db.tables.ringo_points_accounts]
+read = "public"
+write = "public"
+
+[db.tables.ringo_points_daily]
+read = "public"
+write = "public"
+
+[db.tables.ringo_points_ledger]
+read = "public"
+write = "public"
+
+# Günlük çark durumu ve çevirme geçmişi kullanıcıya özeldir; yazma yalnızca /api/daily-wheel üzerinden.
+[db.tables.ringo_daily_wheel_state]
+read = "own"
+write = "own"
+
+[db.tables.ringo_daily_wheel_spins]
+read = "own"
+write = "own"
+
+# Beceri oyunu oturumları: sıralama tablosu için okunabilir; yazma yalnızca /api/skill-games üzerinden, kendi satırına.
+[db.tables.ringo_skill_sessions]
+read = "public"
+write = "own"
+
+# Parti oyunları (Penaltı, Yalancılar Kafesi, Vampir-Köylü) ve rekor oyunları (Yılan, Balık Tutma):
+# ringo_party_rooms / ringo_party_players / ringo_party_chat / ringo_arcade_runs BİLEREK burada listelenmez
+# (Batak oturum tabloları gibi). Gizli kartlar, roller ve vampir sohbeti yalnızca /api/party ve /api/arcade
+# uçlarından, üyelik kontrolüyle okunur. Bot oyuncular user_id='bot:<uuid>' satırlarıdır; "own" kuralı bunları engellerdi.
+
+# Social content is publicly readable where the API allows it, but only its owner may mutate it.
+[db.tables.ringo_posts]
+read = "public"
+write = "own"
+
+[db.tables.ringo_post_comments]
+read = "public"
+write = "own"
+
+[db.tables.ringo_post_likes]
+read = "public"
+write = "own"
+
+# Oyun lobisi: kim çevrimiçi ve lobi sohbeti herkese görünür; her kullanıcı yalnızca kendi satırını yazar (api/lobby.js).
+[db.tables.ringo_lobby_presence]
+read = "public"
+write = "own"
+
+[db.tables.ringo_lobby_messages]
+read = "public"
+write = "own"
+
+# Rozet mağazası: katalog herkese okunur, yalnızca proje sahibi değiştirir.
+[db.tables.ringo_badge_catalog]
+read = "public"
+write = "member"
+
+# Takılı rozet başkalarının avatarında görünür (okuma açık); her kullanıcı sadece kendi satırını yazar.
+# Satın alma /api/badges üzerinden tek SQL ifadesiyle ve cüzdan kaydıyla yapılır.
+[db.tables.ringo_user_badges]
+read = "public"
+write = "own"
+
+[db.tables.ringo_badge_purchases]
+read = "own"
+write = "own"
+
+# Ajans oda moderasyonu: susturma/uzaklaştırma ve sabit mesaj kayıtları herkese okunur (etiket ve uyarı için);
+# yazma yalnızca rütbe hiyerarşisini kontrol eden ringo_agency_moderate / ringo_agency_delete_message fonksiyonlarıyla.
+[db.tables.ringo_agency_sanctions]
+read = "public"
+write = "public"
+
+[db.tables.ringo_agency_room_pins]
+read = "public"
+write = "public"
+
+# VIP: paketler herkese okunur; VIP etiketi başkalarının isminde görünür; satın alma /api/vip ile cüzdan kaydına bağlı.
+[db.tables.ringo_vip_catalog]
+read = "public"
+write = "member"
+
+[db.tables.ringo_user_vip]
+read = "public"
+write = "own"
+
+[db.tables.ringo_vip_purchases]
+read = "own"
+write = "own"
+
+# Ajans kameralı oda (koltuklar, istekler, ayarlar). Yazma yalnızca ringo_live_* fonksiyonlarıyla.
+[db.tables.ringo_site_settings]
+read = "public"
+write = "member"
+
+[db.tables.ringo_agency_live_settings]
+read = "public"
+write = "public"
+
+[db.tables.ringo_agency_live_seats]
+read = "public"
+write = "public"
+
+[db.tables.ringo_agency_live_requests]
+read = "public"
+write = "public"
+
+[db.tables.ringo_agency_live_sfu_sessions]
+read = "public"
+write = "public"
+
+# Cloudflare Realtime SFU credentials; values are entered in Hatchable Setup and read server-side only.
+[[secret]]
+name = "REALTIME_SFU_APP_ID"
+required = false
+description = "Cloudflare Realtime SFU App ID. Server-side only; never expose in browser code."
+
+[[secret]]
+name = "REALTIME_SFU_BEARER_TOKEN"
+required = false
+description = "Cloudflare Realtime SFU App Secret/Bearer token. Server-side only; never expose in browser code."
+
+[[secret]]
+name = "RINGO_RT_SECRET"
+required = false
+description = "Shared signing key with the Ringo realtime Cloudflare Worker (game tables). Same value as the Worker secret. Server-side only; never expose in browser code."
+
+# Kurumsal site iletişim formu (2026-11-25): ziyaretçi yazar, yalnız sahip/ekip okur.
+[db.tables.ringo_kurumsal_iletisim]
+read = "member"
+write = "public"

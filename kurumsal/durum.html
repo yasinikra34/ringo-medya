@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Sistem Durumu — Ringo</title>
+<meta name="description" content="Ringo sunucularının anlık durumu ve yanıt süreleri.">
+<meta name="theme-color" content="#ffffff">
+<link rel="icon" href="assets/img/favicon.ico" sizes="32x32">
+<link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/site.css?v=1">
+</head>
+<body>
+
+<section style="padding-top:56px">
+  <div class="kap" style="max-width:820px">
+    <div class="bolum-bas"><span class="etiket">Canlı</span><h1 style="font-size:clamp(36px,7vw,60px)">Sistem Durumu</h1>
+      <p class="alt">Bu sayfa her 30 saniyede bir Ringo sunucularını doğrudan sorgular.</p></div>
+
+    <div class="ozet bekle" id="ozet"><i class="nabiz" style="background:#fff"></i><span id="ozetYazi">Kontrol ediliyor…</span></div>
+
+    <div class="durum-izgara" id="satirlar">
+      <div class="durum-satir" data-k="api"><i class="nabiz"></i><div class="ad"><b>Uygulama API</b><small>Giriş, odalar, profil, hediye işlemleri</small></div><span class="ms">–</span><span class="yazi">…</span></div>
+      <div class="durum-satir" data-k="veritabani"><i class="nabiz"></i><div class="ad"><b>Veritabanı</b><small>Hesaplar, puanlar, kayıtlar</small></div><span class="ms">–</span><span class="yazi">…</span></div>
+      <div class="durum-satir" data-k="gercek_zamanli"><i class="nabiz"></i><div class="ad"><b>Gerçek Zamanlı Motor</b><small>Oyun masaları ve canlı odalar</small></div><span class="ms">–</span><span class="yazi">…</span></div>
+      <div class="durum-satir" data-k="bekci"><i class="nabiz"></i><div class="ad"><b>Bekçi İzleme</b><small id="bekciAlt">Otomatik denetim ve alarm</small></div><span class="ms"></span><span class="yazi">…</span></div>
+    </div>
+
+    <p style="margin-top:22px;color:var(--muted);font-size:14px">Son güncelleme: <b id="saat">–</b></p>
+  </div>
+</section>
+
+<section class="yumusak">
+  <div class="kap" style="max-width:820px">
+    <div class="sayilar" style="grid-template-columns:repeat(3,1fr)">
+      <div class="sayi"><b class="gok-yazi" data-sayi="platform.oyun">28</b><span>oyun</span></div>
+      <div class="sayi"><b class="gok-yazi" data-sayi="platform.hediye">51</b><span>hediye</span></div>
+      <div class="sayi"><b class="gok-yazi" data-sayi="platform.ajans">15</b><span>ajans</span></div>
+    </div>
+  </div>
+</section>
+
+<script src="assets/site.js?v=1"></script>
+<script>
+(function(){
+  function once(t){ if(!t) return ''; var dk=Math.round((Date.now()-new Date(t).getTime())/60000); return dk<1?'az önce':dk+' dk önce'; }
+  function boya(d){
+    var ok=window.RingoSistemOk(d), oz=document.getElementById('ozet');
+    oz.className='ozet '+(ok===null?'sorun':ok?'':'sorun');
+    document.getElementById('ozetYazi').textContent= ok===null?'Sunuculara ulaşılamadı':ok?'Tüm sistemler çalışıyor':'Bazı sistemlerde sorun var';
+    oz.querySelector('.nabiz').className='nabiz '+(ok?'ok':'sorun');
+    document.querySelectorAll('#satirlar .durum-satir').forEach(function(r){
+      var k=r.getAttribute('data-k'), v=d&&d.sistem&&d.sistem[k], n=r.querySelector('.nabiz'), y=r.querySelector('.yazi'), m=r.querySelector('.ms');
+      if(k==='bekci'){
+        var b=v&&v.ok; n.className='nabiz '+(b?'ok':'');
+        y.textContent=b?(v.acik_sorun?v.acik_sorun+' açık uyarı':'Sorun yok'):'Bilgi yok'; y.style.color=b?(v.acik_sorun?'#ff7a1a':'#0f9e68'):'#5f5a76';
+        if(b&&v.son_kontrol) document.getElementById('bekciAlt').textContent='Son bakım raporu: '+once(v.son_kontrol);
+        return;
+      }
+      var o=v&&v.ok; n.className='nabiz '+(v?(o?'ok':'sorun'):'sorun');
+      y.textContent=v?(o?'Çalışıyor':'Sorun'):'Ulaşılamadı'; y.style.color=o?'#0f9e68':'#e0336f';
+      m.textContent=v?v.ms+' ms':'–';
+    });
+    document.getElementById('saat').textContent=new Date().toLocaleTimeString('tr-TR');
+  }
+  function yenile(){ window.RingoDurum(boya); }
+  yenile(); setInterval(yenile,30000);
+})();
+</script>
+</body>
+</html>
