@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/site.css?v=1">
+<link rel="stylesheet" href="assets/site.css?v=2">
 </head>
 <body>
 
@@ -42,7 +42,7 @@
   </div>
 </section>
 
-<script src="assets/site.js?v=1"></script>
+<script src="assets/site.js?v=2"></script>
 <script>
 (function(){
   function once(t){ if(!t) return ''; var dk=Math.round((Date.now()-new Date(t).getTime())/60000); return dk<1?'az önce':dk+' dk önce'; }
@@ -61,7 +61,7 @@
       }
       var o=v&&v.ok; n.className='nabiz '+(v?(o?'ok':'sorun'):'sorun');
       y.textContent=v?(o?'Çalışıyor':'Sorun'):'Ulaşılamadı'; y.style.color=o?'#0f9e68':'#e0336f';
-      m.textContent=v?v.ms+' ms':'–';
+      m.textContent=v&&v.ms!=null?v.ms+' ms':'–';
     });
     document.getElementById('saat').textContent=new Date().toLocaleTimeString('tr-TR');
   }

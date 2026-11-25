@@ -10,7 +10,7 @@
 <link rel="apple-touch-icon" href="assets/img/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,700;12..96,800&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/site.css?v=1">
+<link rel="stylesheet" href="assets/site.css?v=2">
 </head>
 <body>
 
@@ -24,7 +24,8 @@
         <li><span><b>İş birliği:</b> ajanslar, yayıncılar, markalar ve etkinlikler.</span></li>
         <li><span><b>Yatırım:</b> platform, büyüme planı ve teknik inceleme.</span></li>
         <li><span><b>Basın:</b> logo ve görseller için <a href="basin.html" style="color:var(--mor);font-weight:800">Basın Kiti</a>.</span></li>
-        <li><span><b>Kullanıcı desteği:</b> hesabınızla ilgili sorular.</span></li>
+        <li><span><b>Kullanıcı desteği:</b> hesabınızla ilgili sorular ve hesap silme talepleri.</span></li>
+        <li><span><b>Haber ver:</b> Ringo herkese açıldığında size e-posta gönderelim.</span></li>
       </ul>
     </div>
     <form class="form" id="iletisimFormu" novalidate>
@@ -35,22 +36,23 @@
           <option value="yatirim">Yatırım</option>
           <option value="basin">Basın</option>
           <option value="destek">Kullanıcı desteği</option>
+          <option value="bekleme">Ringo açılınca haber ver</option>
         </select>
       </label>
       <div class="iki">
-        <label>Adınız<input name="ad" autocomplete="name" required maxlength="80"></label>
+        <label>Adınız<input name="ad" autocomplete="name" maxlength="80"></label>
         <label>E-posta<input name="eposta" type="email" autocomplete="email" required maxlength="160"></label>
       </div>
-      <label>Kurum (isteğe bağlı)<input name="kurum" autocomplete="organization" maxlength="120"></label>
-      <label>Mesajınız<textarea name="mesaj" required maxlength="3000"></textarea></label>
+      <label data-mesaj>Kurum (isteğe bağlı)<input name="kurum" autocomplete="organization" maxlength="120"></label>
+      <label data-mesaj>Mesajınız<textarea name="mesaj" required maxlength="3000"></textarea></label>
       <div class="tuzak" aria-hidden="true"><label>Web sitesi<input name="web" tabindex="-1" autocomplete="off"></label></div>
       <button class="dugme ana" type="submit">Gönder</button>
       <p class="sonuc" role="status"></p>
-      <p style="color:var(--muted);font-size:13px">Gönderdiğiniz bilgiler yalnız size dönüş yapmak için kullanılır. <a href="https://ringolounge.com/yasal/gizlilik.html" style="text-decoration:underline">Gizlilik Politikası</a></p>
+      <p style="color:var(--muted);font-size:13px">Gönderdiğiniz bilgiler yalnız size dönüş yapmak için kullanılır. <a href="yasal/gizlilik.html" style="text-decoration:underline">Gizlilik Politikası</a></p>
     </form>
   </div>
 </section>
 
-<script src="assets/site.js?v=1"></script>
+<script src="assets/site.js?v=2"></script>
 </body>
 </html>

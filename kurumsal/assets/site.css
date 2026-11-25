@@ -138,6 +138,7 @@ section{padding:88px 0}
 .form textarea{min-height:150px;resize:vertical}
 .form .iki{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 @media(max-width:620px){.form .iki{grid-template-columns:1fr}}
+.form [hidden]{display:none!important}
 .form .tuzak{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .form .sonuc{font-weight:700;font-size:15px;min-height:1.4em}
 .form .sonuc.ok{color:#0f9e68}.form .sonuc.hata{color:#e0336f}
