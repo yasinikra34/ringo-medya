@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kurumsal Mesajlar · Ringo</title>
+<style>
+  body{margin:0;font:15px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif;color:#16122b;background:#fff}
+  header{position:sticky;top:0;background:#fff;border-bottom:1px solid #ece8f6;padding:14px 18px;display:flex;align-items:center;gap:12px}
+  header b{font-size:18px}
+  header::after{content:"";position:absolute;left:0;right:0;bottom:-3px;height:3px;background:linear-gradient(90deg,#ff2d95,#8a3ffc,#2f6bff,#00c2e8,#ffc400,#ff7a1a)}
+  main{max-width:760px;margin:0 auto;padding:18px}
+  .sekme{display:flex;gap:8px;margin-bottom:16px}
+  .sekme button{flex:1;padding:12px;border-radius:14px;border:1.5px solid #ece8f6;background:#f8f6ff;font:700 15px inherit;cursor:pointer}
+  .sekme button.on{background:linear-gradient(100deg,#ff2d95,#8a3ffc);color:#fff;border-color:transparent}
+  .k{border:1px solid #ece8f6;border-radius:16px;padding:14px 16px;margin-bottom:10px}
+  .k small{color:#5f5a76}
+  .k .konu{display:inline-block;font:800 12px inherit;padding:3px 10px;border-radius:999px;background:#f1e9ff;color:#8a3ffc;margin-bottom:6px}
+  .k p{white-space:pre-wrap;margin:8px 0 0}
+  .k a{color:#8a3ffc;font-weight:700}
+  .bos{color:#5f5a76;text-align:center;padding:40px 0}
+  .hata{color:#e0336f}
+</style>
+</head>
+<body>
+<header><b>Kurumsal Mesajlar</b><small id="ozet" style="color:#5f5a76"></small></header>
+<main>
+  <div class="sekme"><button class="on" data-s="m">Mesajlar <span id="nm"></span></button><button data-s="b">Bekleme listesi <span id="nb"></span></button></div>
+  <div id="liste"><p class="bos">Yükleniyor…</p></div>
+</main>
+<script>
+(function(){
+  var veri=null, sekme='m', L=document.getElementById('liste');
+  function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});}
+  function t(x){return new Date(x).toLocaleString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});}
+  var KONU={genel:'Genel bilgi',is:'İş birliği',yatirim:'Yatırım',basin:'Basın',destek:'Kullanıcı desteği'};
+  function ciz(){
+    if(!veri)return;
+    if(sekme==='m'){
+      L.innerHTML=veri.mesajlar.length?veri.mesajlar.map(function(m){return '<div class="k"><span class="konu">'+esc(KONU[m.konu]||m.konu)+'</span><br><b>'+esc(m.ad)+'</b>'+(m.kurum?' · '+esc(m.kurum):'')+'<br><a href="mailto:'+esc(m.eposta)+'">'+esc(m.eposta)+'</a> <small>· '+t(m.t)+'</small>'+(m.ek?'<br><small>'+Object.keys(m.ek).map(function(k){return '<b>'+esc(k)+':</b> '+esc(m.ek[k]);}).join(' · ')+'</small>':'')+'<p>'+esc(m.mesaj)+'</p></div>';}).join(''):'<p class="bos">Henüz mesaj yok.</p>';
+    } else {
+      L.innerHTML=veri.bekleme.length?veri.bekleme.map(function(b){return '<div class="k"><a href="mailto:'+esc(b.e)+'">'+esc(b.e)+'</a>'+(b.a?' · '+esc(b.a):'')+' <small>· '+t(b.t)+'</small></div>';}).join(''):'<p class="bos">Bekleme listesi boş.</p>';
+    }
+  }
+  document.querySelectorAll('.sekme button').forEach(function(b){b.onclick=function(){document.querySelectorAll('.sekme button').forEach(function(x){x.classList.toggle('on',x===b);});sekme=b.getAttribute('data-s');ciz();};});
+  fetch('/api/kurumsal/kayitlar',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.json();}).then(function(d){
+    if(!d||!d.ok){L.innerHTML='<p class="bos hata">'+esc((d&&d.error)||'Açılamadı.')+'</p>';return;}
+    veri=d; document.getElementById('nm').textContent='('+d.mesaj_sayisi+')'; document.getElementById('nb').textContent='('+d.bekleme_sayisi+')'; ciz();
+  }).catch(function(){L.innerHTML='<p class="bos hata">Bağlantı hatası.</p>';});
+})();
+</script>
+</body>
+</html>
