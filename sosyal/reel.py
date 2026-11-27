@@ -139,7 +139,7 @@ def hediye(ad, bas, sure):
     return out
 
 def sahne_kapanis():
-    out = logo_pop(int(3.6 * FPS), olcek_son=1.3, y_merkez=H * .40)
+    out = logo_pop(int(5 * FPS), olcek_son=1.3, y_merkez=H * .40)
     f1 = ImageFont.truetype(F_B, 104); f2 = ImageFont.truetype(F_M, 50)
     son = []
     for i, f in enumerate(out):
@@ -154,26 +154,54 @@ def sahne_kapanis():
         im.alpha_composite(lay); son.append(np.asarray(im.convert('RGB')))
     return son
 
+SARKI = '/home/claude/sm/sarki.mp3'; SARKI_BAS = 145.0   # son nakarat (2:25), 4 sn'lik ölçüler
+
+def sahne_logo4():
+    damla = video_kareleri(V_DAMLA, 0, 1.6)[:38]
+    flas = [(damla[-1] * (1 - (1 - i / 4)) + 255 * (1 - i / 4)).astype(np.uint8) for i in range(4)]
+    return damla + flas + logo_pop(96 - len(damla) - 4)
+
+def kapaklar(adlar, sure):
+    out = []; n = max(1, int(sure * FPS / len(adlar)))
+    for a in adlar:
+        k = Image.open(KAP + a + '.jpg').convert('RGB')
+        for i in range(n):
+            z = 1 + .05 * i / n; cw, ch = int(940 * z), int(627 * z)
+            c = k.resize((cw, ch), Image.LANCZOS).convert('RGBA')
+            m = Image.new('L', (cw, ch), 0); ImageDraw.Draw(m).rounded_rectangle((0, 0, cw, ch), 44, fill=255); c.putalpha(m)
+            out.append(ustune(ZEMIN, c, (W - cw) / 2, H * .52 - ch / 2))
+    return out
+
+def tam(kareler, n):  # tam n kare (ölçüye oturt)
+    kareler = list(kareler)
+    while len(kareler) < n: kareler.append(kareler[-1])
+    return kareler[:n]
+
 def main():
+    S = 96  # 4 sn
     sahneler = [
-        sahne_logo(),
-        baslik_ekle(video_kareleri(V_YOLDAS, 1.2, 6.6), 'Yoldaşını seç, birlikte büyüt'),
-        baslik_ekle(video_kareleri(V_ODA, 0, 5.4), 'Canlı sesli odalarda sohbet et'),
-        baslik_ekle(sahne_oyunlar(), '28 oyun, arkadaşlarınla oyna'),
-        baslik_ekle(hediye('kalp-yagmuru', 1.6, 1.5) + hediye('gokkusagi', 1.8, 1.5) + hediye('balon', 1.6, 1.5) + hediye('kelebek', 1.4, 1.5),
-                    'Hediyelerle sevdiğini mutlu et'),
-        sahne_kapanis(),
+        tam(sahne_logo4(), S),                                                                     # Ringo'ya gel
+        tam(baslik_ekle(video_kareleri(V_ODA, 0, 2), 'Sohbet burada'), S // 2)                      # Sohbet burada,
+        + tam(baslik_ekle(kapaklar(['01-101-okey', '06-tavla', '03-ringo-51', '07-domino'], 2), 'Oyun burada'), S // 2),  # oyun burada
+        tam(baslik_ekle(video_kareleri(V_YOLDAS, 1.2, 4), 'Yoldaşını seç, birlikte büyüt'), S),        # Ringo'ya gel
+        tam(baslik_ekle(hediye('kalp-yagmuru', 1.6, 2), 'Eğlence burada'), S // 2)                    # Eğlence burada,
+        + tam(baslik_ekle(video_kareleri(V_YOLDAS, 6.0, 2), 'Dostluk burada'), S // 2),               # dostluk burada
+        tam(baslik_ekle(video_kareleri(V_ODA, 2, 6), 'Canlı sesli odalarda sohbet et'), S + S // 2)   # Ringo'ya gel / birlikte gül
+        + tam(baslik_ekle(hediye('gokkusagi', 1.8, 1) + hediye('balon', 1.6, 1), 'Hediyelerle sevdiğini mutlu et'), S // 2),
+        tam(baslik_ekle(kapaklar(['02-koz-maca', '10-bilardo', '04-ringo-pisti', '11-dart', '05-batak', '01-101-okey', '06-tavla', '07-domino'], 4),
+                        '28 oyun, arkadaşlarınla oyna'), S),                                           # Ringo'ya gel
+        tam(sahne_kapanis(), int(5 * FPS)),                                                          # Kalbini aç, oyuna başla
     ]
+    toplam = sum(len(x) for x in sahneler); sure = toplam / FPS
     enc = subprocess.Popen(['ffmpeg', '-v', 'error', '-y', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(FPS), '-i', '-',
-                            '-f', 'lavfi', '-i', 'anullsrc=r=44100:cl=stereo', '-shortest',
+                            '-ss', str(SARKI_BAS), '-t', str(sure), '-i', SARKI,
+                            '-af', f'afade=t=in:d=0.05,afade=t=out:st={sure - 1.6}:d=1.6',
                             '-c:v', 'libx264', '-preset', 'veryfast', '-crf', '20', '-pix_fmt', 'yuv420p', '-movflags', '+faststart',
-                            '-c:a', 'aac', '-b:a', '64k', OUT], stdin=subprocess.PIPE)
-    n = 0
-    for s in sahneler:
-        for f in s:
-            enc.stdin.write(np.ascontiguousarray(f, np.uint8).tobytes()); n += 1
+                            '-c:a', 'aac', '-b:a', '192k', '-shortest', OUT], stdin=subprocess.PIPE)
+    for x in sahneler:
+        for f in x: enc.stdin.write(np.ascontiguousarray(f, np.uint8).tobytes())
     enc.stdin.close(); enc.wait()
-    print('kare', n, 'sure', round(n / FPS, 1), 'sn ->', OUT)
+    print('kare', toplam, 'sure', round(sure, 2), 'sn ->', OUT)
 
 if __name__ == '__main__':
     main()
